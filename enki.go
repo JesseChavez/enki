@@ -15,8 +15,11 @@ const version = "0.0.1"
 
 type Mux = chi.Mux
 
+var ContextPath = "/"
+
 type Enki struct {
 	AppName string
+	trunk   *Mux
 	Routes  *Mux
 }
 
@@ -25,7 +28,7 @@ func New(name string) Enki {
 
 	app.AppName = name
 
-	app.Routes = app.defaultRoutes()
+	app.trunk, app.Routes = app.appRoutes()
 
 	return app
 }
@@ -35,7 +38,7 @@ func (enki *Enki) ListenAndServe(port string) {
 
 	server := &http.Server{
 		Addr:         webPort,
-		Handler:      enki.Routes,
+		Handler:      enki.trunk,
 		IdleTimeout:  30 * time.Second,
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 600 * time.Second,
