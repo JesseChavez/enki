@@ -1,6 +1,7 @@
 package enki
 
 import (
+	"embed"
 	"fmt"
 	"log"
 	"net/http"
@@ -17,6 +18,8 @@ type Mux = chi.Mux
 
 var ContextPath = "/"
 
+var Resources embed.FS
+
 type Enki struct {
 	AppName string
 	trunk   *Mux
@@ -28,6 +31,7 @@ func New(name string) Enki {
 
 	app.AppName = name
 
+	// Initialize routes
 	app.trunk, app.Routes = app.appRoutes()
 
 	return app
