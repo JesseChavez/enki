@@ -23,6 +23,7 @@ func (ek *Enki) ListenAndServe() {
 
 	log.Println("Web Applications is starting...")
 	log.Println("* Enki version:", ek.Version())
+	log.Println("*  Environment:", ek.Env)
 	log.Println("*    Time zone:", timeZone)
 	log.Println("*   Go version:", runtime.Version())
 	log.Println("*   Process ID:", os.Getpid())

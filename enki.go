@@ -3,8 +3,10 @@ package enki
 import (
 	"embed"
 	"log"
+	"net/http"
 
 	"github.com/JesseChavez/enki/database"
+	"github.com/JesseChavez/enki/templating"
 	"github.com/JesseChavez/spt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-rel/mssql"
@@ -19,13 +21,20 @@ type Mux = chi.Mux
 
 type Repository = rel.Repository
 
+type Renderer interface {
+	Render (w http.ResponseWriter, r *http.Request, view string, data any)
+}
+
 type Enki struct {
 	AppName  string
 	Env      string
 	Routes   *Mux
 	DBConfig database.Config
 	DB       Repository
+	Render   Renderer
 }
+
+var BaseDir string
 
 var Resources embed.FS
 
@@ -40,6 +49,7 @@ var TimeZone = "UTC"
 var webPort     string
 var timeZone    string
 var contextPath string
+var rootPath    string
 
 func New(name string) Enki {
 	app := Enki{}
@@ -49,6 +59,7 @@ func New(name string) Enki {
 	webPort     = WebPort
 	timeZone    = TimeZone
 	contextPath = ContextPath
+	rootPath    = BaseDir
 
 	return app
 }
@@ -63,6 +74,9 @@ func (ek *Enki) InitWebApplication (contextMux *Mux) {
 
 	// init db
 	intializeDatabase(ek)
+
+	// init renderers
+	ek.Render = templating.New( ek.Env, rootPath, Resources)
 }
 
 func (ek *Enki) InitJobApplication () {
