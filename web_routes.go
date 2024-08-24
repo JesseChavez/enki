@@ -8,7 +8,21 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func (c *Enki) appRoutes() (*Mux, *Mux) {
+func (ek *Enki) InitRouting() *Mux {
+	trunkMux, contextMux := appRoutes()
+
+	ek.Routes = trunkMux
+
+	return contextMux
+}
+
+func (ek *Enki) NewRouter() *Mux {
+	mux := chi.NewRouter()
+
+	return mux
+}
+
+func appRoutes() (*Mux, *Mux) {
 	trunkMux := chi.NewRouter()
 
 	// adding to log request details
@@ -23,23 +37,23 @@ func (c *Enki) appRoutes() (*Mux, *Mux) {
 	// adding server status check
 	trunkMux.Use(middleware.Heartbeat("/ping"))
 
-	if ContextPath == "/" {
+	if contextPath == "/" {
 		return trunkMux, trunkMux
 	}
 
-	valid, err := regexp.MatchString(`^/[a-zA-Z]{1}[a-zA-Z-_0-9]+$`, ContextPath)
+	valid, err := regexp.MatchString(`^/[a-zA-Z]{1}[a-zA-Z-_0-9]+$`, contextPath)
 
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
 	if !valid {
-		log.Fatalf("Invalid ContextPath %v, it need to be like \"/api\"", ContextPath)
+		log.Fatalf("Invalid ContextPath %v, it need to be like \"/api\"", contextPath)
 	}
 
 	contextMux := chi.NewRouter()
 
-	trunkMux.Mount(ContextPath, contextMux)
+	trunkMux.Mount(contextPath, contextMux)
 
 	return trunkMux, contextMux
 }

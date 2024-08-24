@@ -1,21 +1,16 @@
 package enki
 
 import (
-	"context"
 	"embed"
-	"fmt"
 	"log"
-	"net/http"
-	"os"
-	"os/signal"
-	"runtime"
-	"syscall"
-	"time"
 
 	"github.com/JesseChavez/enki/database"
 	"github.com/JesseChavez/spt"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-rel/mssql"
 	"github.com/go-rel/rel"
+
+	_ "github.com/microsoft/go-mssqldb"
 )
 
 const version = "0.0.1"
@@ -23,34 +18,61 @@ const version = "0.0.1"
 type Mux = chi.Mux
 
 type Repository = rel.Repository
-type Adapter = rel.Adapter
-
-var ContextPath = "/"
-
-var Resources embed.FS
 
 type Enki struct {
 	AppName  string
 	Env      string
-	trunk    *Mux
 	Routes   *Mux
 	DBConfig database.Config
 	DB       Repository
-	Shutdown []func() error
 }
+
+var Resources embed.FS
+
+var ContextPath = "/"
+
+var WebPort  = "3000"
+
+var TimeZone = "UTC"
+
+
+// private variables
+var webPort     string
+var timeZone    string
+var contextPath string
 
 func New(name string) Enki {
 	app := Enki{}
 
 	app.AppName = name
 
-	// Initialize environment
-	app.Env = app.fetchEnvironment()
-
-	// Initialize routes
-	app.trunk, app.Routes = app.appRoutes()
+	webPort     = WebPort
+	timeZone    = TimeZone
+	contextPath = ContextPath
 
 	return app
+}
+
+func (ek *Enki) Version() string {
+	return version
+}
+
+func (ek *Enki) InitWebApplication (contextMux *Mux) {
+	// Initialize environment
+	ek.Env = ek.fetchEnvironment()
+
+	// init db
+	intializeDatabase(ek)
+}
+
+func (ek *Enki) InitJobApplication () {
+	// Initialize environment
+	ek.Env = ek.fetchEnvironment()
+}
+
+func (ek *Enki) InitDbMigration () {
+	// Initialize environment
+	ek.Env = ek.fetchEnvironment()
 }
 
 func (enki *Enki) fetchEnvironment() string {
@@ -70,69 +92,44 @@ func (enki *Enki) fetchEnvironment() string {
 	return env
 }
 
-func (enki *Enki) NewDBConfig() database.EnvConfig {
+func intializeDatabase(ek *Enki) {
+	config := ek.NewDBConfig()
+
+	adapterName := config.Current.Adapter
+
+	url := config.Current.GetUrl()
+
+	var adapter rel.Adapter
+	var err error
+
+	switch adapterName {
+	case "sqlserver":
+		adapter, err = mssql.Open(url)
+	case "postgres":
+		// adapter, err = postgres.Open(url)
+	case "sqlite3":
+		// adapter, err = sqlite3.Open(url)
+	default:
+		log.Fatalf("Invalid adapter '%v'", adapterName)
+	}
+
+	if err != nil {
+		panic(err)
+	}
+
+	// Add to shutdown list.
+	Shutdown = append(Shutdown, adapter.Close)
+
+	ek.DB = rel.New(adapter)
+	// repo.Ping(context.TODO())
+}
+
+func (ek *Enki) NewDBConfig() database.EnvConfig {
 	blob := dbConfigFile()
 
-	config := database.NewConfig(blob, enki.Env)
+	config := database.NewConfig(blob, ek.Env)
 
 	return config
-}
-
-func (enki *Enki) ListenAndServe(port string) {
-	webPort := fmt.Sprintf(":%v", port)
-
-	server := &http.Server{
-		Addr:         webPort,
-		Handler:      enki.trunk,
-		IdleTimeout:  30 * time.Second,
-		ReadTimeout:  30 * time.Second,
-		WriteTimeout: 600 * time.Second,
-	}
-
-	log.Println("Web Applications is starting...")
-	log.Println("* Enki version:", enki.Version())
-	log.Println("*   Go version:", runtime.Version())
-	log.Println("*   Process ID:", os.Getpid())
-	log.Println("*   Using port:", port)
-	log.Println("Use Ctrl-C to stop")
-
-	halt := make(chan struct{})
-
-	ctx := context.Background()
-
-	go enki.gracefulShutdown(ctx, server, halt)
-
-	if err := server.ListenAndServe(); err != http.ErrServerClosed {
-		// Error starting or closing listener:
-		log.Fatalf("HTTP server ListenAndServe: %v", err)
-	}
-
-	<-halt
-}
-
-func (enki *Enki) gracefulShutdown(ctx context.Context, server *http.Server, halt chan struct{}) {
-	sigint := make(chan os.Signal, 1)
-
-	signal.Notify(sigint, os.Interrupt, syscall.SIGTERM)
-	<-sigint
-
-	log.Println("shutting down server gracefully")
-
-	// stop receiving any request.
-	if err := server.Shutdown(ctx); err != nil {
-		log.Fatal("shutdown error", err)
-	}
-
-	// close any other things db, redis, etc.
-	for i := range enki.Shutdown {
-		enki.Shutdown[i]()
-	}
-
-	close(halt)
-}
-
-func (enki *Enki) Version() string {
-	return version
 }
 
 func dbConfigFile() []byte {
