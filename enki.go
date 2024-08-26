@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/JesseChavez/enki/database"
-	"github.com/JesseChavez/enki/templating"
+	"github.com/JesseChavez/enki/views"
 	"github.com/JesseChavez/spt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-rel/mssql"
@@ -19,10 +19,12 @@ const version = "0.0.1"
 
 type Mux = chi.Mux
 
+type Router = chi.Router
+
 type Repository = rel.Repository
 
 type Renderer interface {
-	Render (w http.ResponseWriter, r *http.Request, view string, data any)
+	Render(w http.ResponseWriter, r *http.Request, view string, data any)
 }
 
 type Enki struct {
@@ -40,26 +42,25 @@ var Resources embed.FS
 
 var ContextPath = "/"
 
-var WebPort  = "3000"
+var WebPort = "3000"
 
 var TimeZone = "UTC"
 
-
 // private variables
-var webPort     string
-var timeZone    string
+var webPort string
+var timeZone string
 var contextPath string
-var rootPath    string
+var rootPath string
 
 func New(name string) Enki {
 	app := Enki{}
 
 	app.AppName = name
 
-	webPort     = WebPort
-	timeZone    = TimeZone
+	webPort = WebPort
+	timeZone = TimeZone
 	contextPath = ContextPath
-	rootPath    = BaseDir
+	rootPath = BaseDir
 
 	return app
 }
@@ -68,7 +69,7 @@ func (ek *Enki) Version() string {
 	return version
 }
 
-func (ek *Enki) InitWebApplication (contextMux *Mux) {
+func (ek *Enki) InitWebApplication(contextMux *Mux) {
 	// Initialize environment
 	ek.Env = ek.fetchEnvironment()
 
@@ -76,15 +77,15 @@ func (ek *Enki) InitWebApplication (contextMux *Mux) {
 	intializeDatabase(ek)
 
 	// init renderers
-	ek.Render = templating.New( ek.Env, rootPath, Resources)
+	ek.Render = views.New(ek.Env, rootPath, Resources)
 }
 
-func (ek *Enki) InitJobApplication () {
+func (ek *Enki) InitJobApplication() {
 	// Initialize environment
 	ek.Env = ek.fetchEnvironment()
 }
 
-func (ek *Enki) InitDbMigration () {
+func (ek *Enki) InitDbMigration() {
 	// Initialize environment
 	ek.Env = ek.fetchEnvironment()
 }
