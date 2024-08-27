@@ -55,6 +55,9 @@ var rootPath string
 func New(name string) Enki {
 	app := Enki{}
 
+	// Initialize environment before anything else
+	app.Env = app.fetchEnvironment()
+
 	app.AppName = name
 
 	webPort = WebPort
@@ -70,9 +73,6 @@ func (ek *Enki) Version() string {
 }
 
 func (ek *Enki) InitWebApplication(contextMux *Mux) {
-	// Initialize environment
-	ek.Env = ek.fetchEnvironment()
-
 	// init db
 	intializeDatabase(ek)
 
@@ -81,13 +81,9 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 }
 
 func (ek *Enki) InitJobApplication() {
-	// Initialize environment
-	ek.Env = ek.fetchEnvironment()
 }
 
 func (ek *Enki) InitDbMigration() {
-	// Initialize environment
-	ek.Env = ek.fetchEnvironment()
 }
 
 func (enki *Enki) fetchEnvironment() string {
