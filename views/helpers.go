@@ -10,26 +10,26 @@ var funcMap = template.FuncMap{
 	"javascriptPath": javascriptPath,
 }
 
-func stylesheetPath(name string) string {
-	if envRender != "development" {
-		return fmt.Sprintf("%v-123456789.css", name)
-	}
+func stylesheetPath(assetName string) string {
+	key := fmt.Sprintf("%v.css", assetName)
 
-	return fmt.Sprintf("%v.css", name)
+	filePath := Manifest[key]
+
+	return fmt.Sprintf("assets/%v", filePath)
 }
 
-func javascriptPath(name string) string {
-	if envRender != "development" {
-		return fmt.Sprintf("%v-1234567890.js", name)
-	}
+func javascriptPath(assetName string) string {
+	key := fmt.Sprintf("%v.js", assetName)
 
-	return fmt.Sprintf("%v.js", name)
+	filePath := Manifest[key]
+
+	return fmt.Sprintf("assets/%v", filePath)
 }
 
-func assetPath(name string) string {
-	if envRender != "development" {
-		return fmt.Sprintf("%v", name)
-	}
+func assetPath(assetName string) string {
+	key := fmt.Sprintf("%v", assetName)
 
-	return fmt.Sprintf("%v", name)
+	filePath := Manifest[key]
+
+	return fmt.Sprintf("assets/%v", filePath)
 }

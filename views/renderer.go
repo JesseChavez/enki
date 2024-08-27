@@ -2,12 +2,14 @@ package views
 
 import (
 	"embed"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
 	"io/fs"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -69,6 +71,8 @@ func (ren *Renderer) fetchTemplate(tmpl string) (*template.Template, error) {
 }
 
 func (ren *Renderer) templateFromCache(tmpl string) (*template.Template, error) {
+	ren.loadManifest()
+
 	parsedTmpl, ok := TemplateCache[tmpl]
 
 	if ok {
@@ -156,6 +160,8 @@ func (ren *Renderer) templateKey(file string) string {
 }
 
 func (ren *Renderer) templateFromDisk(tmpl string) (*template.Template, error) {
+	ren.loadManifestDev()
+
 	tmplParts := []string{ren.rootPath, ren.tmplPath, tmpl}
 	sharedParts := []string{ren.rootPath, ren.tmplPath, "/layouts/*.tmpl"}
 
@@ -186,4 +192,38 @@ func (ren *Renderer) templateFromDisk(tmpl string) (*template.Template, error) {
 	fmt.Println("rendering with base:", shared)
 
 	return parsedTmpl, nil
+}
+
+func (ren *Renderer) loadManifest() error {
+	mfile, err := ren.files.ReadFile("public/assets/manifest.json")
+
+	if err != nil {
+		log.Println("Error reading assets manifest.json:", err)
+	}
+
+	err = json.Unmarshal([]byte(mfile), &Manifest)
+
+	if err != nil {
+		log.Println("Error parsing assets manifest.json:", err)
+	}
+
+	return nil
+}
+
+func (ren *Renderer) loadManifestDev() error {
+	mpath := ren.rootPath + "/frontend/builds/manifest.json"
+
+	mfile, err := os.ReadFile(mpath)
+
+	if err != nil {
+		log.Println("Error reading assets manifest.json:", err)
+	}
+
+	err = json.Unmarshal([]byte(mfile), &Manifest)
+
+	if err != nil {
+		log.Println("Error parsing assets manifest.json:", err)
+	}
+
+	return nil
 }
