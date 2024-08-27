@@ -1,7 +1,10 @@
 package enki
 
 import (
+	"io/fs"
 	"log"
+	"net/http"
+	"os"
 	"regexp"
 
 	"github.com/go-chi/chi/v5"
@@ -9,7 +12,7 @@ import (
 )
 
 func (ek *Enki) InitRouting() *Mux {
-	trunkMux, contextMux := appRoutes()
+	trunkMux, contextMux := ek.appRoutes()
 
 	ek.Routes = trunkMux
 
@@ -22,7 +25,7 @@ func (ek *Enki) NewRouter() *Mux {
 	return mux
 }
 
-func appRoutes() (*Mux, *Mux) {
+func (ek *Enki) appRoutes() (*Mux, *Mux) {
 	trunkMux := chi.NewRouter()
 
 	// adding to log request details
@@ -38,6 +41,8 @@ func appRoutes() (*Mux, *Mux) {
 	trunkMux.Use(middleware.Heartbeat("/ping"))
 
 	if contextPath == "/" {
+		ek.staticAssets(trunkMux)
+
 		return trunkMux, trunkMux
 	}
 
@@ -53,7 +58,63 @@ func appRoutes() (*Mux, *Mux) {
 
 	contextMux := chi.NewRouter()
 
+	ek.staticAssets(contextMux)
+
 	trunkMux.Mount(contextPath, contextMux)
 
 	return trunkMux, contextMux
+}
+
+func (ek *Enki) staticAssets(mux *Mux) {
+	// Disable assets index page
+	mux.Get("/assets/", func(w http.ResponseWriter, r *http.Request){
+		w.WriteHeader(http.StatusNotFound)
+	})
+
+	if ek.Env != "development" {
+		// Handle static assets for production or test env.
+		mux.Handle("/assets/*", http.StripPrefix("/assets", ek.staticHandler()))
+	} else {
+		// Handle static assets for development env.
+		mux.Handle("/assets/*", http.StripPrefix("/assets", ek.staticHandlerDev()))
+	}
+}
+
+func (ek *Enki) staticHandler() http.HandlerFunc {
+	publicDir, err := fs.Sub(Resources, "public/assets")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fileServer := http.FileServer(http.FS(publicDir))
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		// add custom headers
+		w.Header().Add("Cache-Control", "public, max-age=31536000, immutable")
+		// w.Header().Add("X-Frame-Options", "SAMEORIGIN")
+		// w.Header().Add("X-Content-Type-Options", "nosniff")
+		// w.Header().Add("X-XSS-Protection", "1; mode=block")
+		// w.Header().Add("Strict-Transport-Security", "max-age=31536000; includeSubdomains;")
+		// w.Header().Add("Referrer-Policy", "no-referrer-when-downgrade")
+		w.Header().Add("X-API-Assets", "static")
+
+		fileServer.ServeHTTP(w, r)
+	}
+}
+
+func (ek *Enki) staticHandlerDev() http.HandlerFunc {
+	publicDir := rootPath + "/frontend/builds"
+
+	if  _, err := os.Stat(publicDir); os.IsNotExist(err) {
+		log.Fatal(err)
+	}
+
+	fileServer := http.FileServer(http.Dir(publicDir))
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("X-API-Assets", "static")
+
+		fileServer.ServeHTTP(w, r)
+	}
 }
