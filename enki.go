@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/JesseChavez/enki/database"
+	"github.com/JesseChavez/enki/session"
 	"github.com/JesseChavez/enki/views"
 	"github.com/JesseChavez/spt"
 	"github.com/go-chi/chi/v5"
@@ -27,6 +28,10 @@ type Renderer interface {
 	Render(w http.ResponseWriter, r *http.Request, view string, data any)
 }
 
+type SessionStore interface {
+	GetSession(*http.Request) *session.Session
+}
+
 type Enki struct {
 	AppName  string
 	Env      string
@@ -34,6 +39,7 @@ type Enki struct {
 	DBConfig database.Config
 	DB       Repository
 	Render   Renderer
+	SessStore SessionStore
 }
 
 var BaseDir string
@@ -41,6 +47,8 @@ var BaseDir string
 var Resources embed.FS
 
 var ContextPath = "/"
+
+var SessionKey = "_enki_session"
 
 var WebPort = "3000"
 
@@ -50,6 +58,7 @@ var TimeZone = "UTC"
 var webPort string
 var timeZone string
 var contextPath string
+var sessionKey string
 var rootPath string
 
 func New(name string) Enki {
@@ -63,6 +72,7 @@ func New(name string) Enki {
 	webPort = WebPort
 	timeZone = TimeZone
 	contextPath = ContextPath
+	sessionKey = SessionKey
 	rootPath = BaseDir
 
 	return app
@@ -73,6 +83,9 @@ func (ek *Enki) Version() string {
 }
 
 func (ek *Enki) InitWebApplication(contextMux *Mux) {
+	// initialize session store
+	ek.SessStore = session.New(sessionKey)
+
 	// init db
 	intializeDatabase(ek)
 
@@ -101,6 +114,9 @@ func (enki *Enki) fetchEnvironment() string {
 	}
 
 	return env
+}
+
+func intializeSessionStore(ek *Enki) {
 }
 
 func intializeDatabase(ek *Enki) {
