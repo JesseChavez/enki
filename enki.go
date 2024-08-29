@@ -126,6 +126,8 @@ func intializeDatabase(ek *Enki) {
 
 	url := config.Current.GetUrl()
 
+	log.Println("DB connection url:", url)
+
 	var adapter rel.Adapter
 	var err error
 

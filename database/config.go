@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"log"
 
 	"gopkg.in/yaml.v3"
@@ -35,7 +34,7 @@ func NewConfig(file []byte, env string) EnvConfig {
 		log.Fatal(err.Error())
 	}
 
-	fmt.Printf("db config: %+v\n", config)
+	// fmt.Printf("db config: %+v\n", config)
 
 	curr := config.GetEnv(env)
 
