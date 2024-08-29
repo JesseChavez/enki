@@ -11,9 +11,11 @@ import (
 	"github.com/JesseChavez/spt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-rel/mssql"
+	"github.com/go-rel/postgres"
 	"github.com/go-rel/rel"
 
 	_ "github.com/microsoft/go-mssqldb"
+	_ "github.com/lib/pq"
 )
 
 const version = "0.0.1"
@@ -135,7 +137,7 @@ func intializeDatabase(ek *Enki) {
 	case "sqlserver":
 		adapter, err = mssql.Open(url)
 	case "postgres":
-		// adapter, err = postgres.Open(url)
+		adapter, err = postgres.Open(url)
 	case "sqlite3":
 		// adapter, err = sqlite3.Open(url)
 	default:
