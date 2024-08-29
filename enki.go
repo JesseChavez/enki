@@ -4,6 +4,7 @@ import (
 	"embed"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/JesseChavez/enki/database"
 	"github.com/JesseChavez/enki/session"
@@ -14,8 +15,8 @@ import (
 	"github.com/go-rel/postgres"
 	"github.com/go-rel/rel"
 
-	_ "github.com/microsoft/go-mssqldb"
 	_ "github.com/lib/pq"
+	_ "github.com/microsoft/go-mssqldb"
 )
 
 const version = "0.0.1"
@@ -156,15 +157,27 @@ func intializeDatabase(ek *Enki) {
 }
 
 func (ek *Enki) NewDBConfig() database.EnvConfig {
-	blob := dbConfigFile()
+	blob := dbConfigFile(ek.Env)
 
 	config := database.NewConfig(blob, ek.Env)
 
 	return config
 }
 
-func dbConfigFile() []byte {
+func dbConfigFile(env string) []byte {
+	if env == "production" {
+		file, err := os.ReadFile(rootPath + "/database.yml")
+
+		if err == nil {
+			return file
+		}
+
+		log.Println("File not found, trying embeded file")
+	}
+
 	file, err := Resources.ReadFile("config/database.yml")
+
+	log.Println("Project root:", rootPath)
 
 	if err != nil {
 		log.Fatal(err.Error())
