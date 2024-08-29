@@ -55,7 +55,7 @@ func (ren *Renderer) Render(w http.ResponseWriter, r *http.Request, tmpl string,
 		return
 	}
 
-	log.Println("rendering ...")
+	// log.Println("rendering ...")
 }
 
 func (ren *Renderer) fetchTemplate(tmpl string) (*template.Template, error) {
@@ -101,10 +101,10 @@ func (ren *Renderer) templateCache() error {
 
 	pages, shared := ren.fetchTemplatefiles()
 
-	fmt.Println("============================================================================")
-	fmt.Println("templates main:", pages)
-	fmt.Println("templates base:", shared)
-	fmt.Println("============================================================================")
+	fmt.Println("Main templates:")
+	fmt.Println(strings.Join(pages, "\n"))
+	fmt.Println("Base templates:")
+	fmt.Println(strings.Join(shared, "\n"))
 
 	for _, page := range pages {
 		name := filepath.Base(page)
@@ -120,8 +120,8 @@ func (ren *Renderer) templateCache() error {
 			}
 		}
 
-		fmt.Println("name:", key)
-		fmt.Println("tmpl:", tmpl)
+		// fmt.Println("name:", key)
+		// fmt.Println("tmpl:", tmpl)
 		TemplateCache[key] = tmpl
 	}
 
@@ -188,8 +188,9 @@ func (ren *Renderer) templateFromDisk(tmpl string) (*template.Template, error) {
 		}
 	}
 
-	fmt.Println("rendering with main:", tmplFile)
-	fmt.Println("rendering with base:", shared)
+	log.Println("Templates:")
+	fmt.Println(strings.Join(shared, "\n"))
+	fmt.Println(tmplFile)
 
 	return parsedTmpl, nil
 }
