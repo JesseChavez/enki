@@ -93,7 +93,7 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 	intializeDatabase(ek)
 
 	// init renderers
-	ek.Render = views.New(ek.Env, rootPath, Resources)
+	ek.Render = views.New(ek.Env, contextPath, rootPath, Resources)
 }
 
 func (ek *Enki) InitJobApplication() {

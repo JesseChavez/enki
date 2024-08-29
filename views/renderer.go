@@ -15,24 +15,32 @@ import (
 )
 
 type Renderer struct {
-	env      string
-	rootPath string
-	tmplPath string
-	files    embed.FS
+	env        string
+	prefixPath string
+	rootPath   string
+	tmplPath   string
+	files      embed.FS
 }
 
-var envRender = "development"
+var prefixPath = ""
+
+var envRender string
 
 var Manifest = map[string]string{}
 
 var TemplateCache = map[string]*template.Template{}
 
-func New(env string, rootPath string, files embed.FS) *Renderer {
+func New(env string, contextPath string, rootPath string, files embed.FS) *Renderer {
+	if contextPath != "/" {
+		prefixPath = contextPath
+	}
+
 	renderer := Renderer{
-		env:      env,
-		rootPath: rootPath,
-		tmplPath: "app/templates",
-		files:    files,
+		env:        env,
+		prefixPath: prefixPath,
+		rootPath:   rootPath,
+		tmplPath:   "app/templates",
+		files:      files,
 	}
 
 	envRender = env

@@ -15,7 +15,7 @@ func stylesheetPath(assetName string) string {
 
 	filePath := Manifest[key]
 
-	return fmt.Sprintf("assets/%v", filePath)
+	return fmt.Sprintf("%s/assets/%v", prefixPath, filePath)
 }
 
 func javascriptPath(assetName string) string {
@@ -23,7 +23,7 @@ func javascriptPath(assetName string) string {
 
 	filePath := Manifest[key]
 
-	return fmt.Sprintf("assets/%v", filePath)
+	return fmt.Sprintf("%s/assets/%v", prefixPath, filePath)
 }
 
 func assetPath(assetName string) string {
@@ -31,5 +31,5 @@ func assetPath(assetName string) string {
 
 	filePath := Manifest[key]
 
-	return fmt.Sprintf("assets/%v", filePath)
+	return fmt.Sprintf("%s/assets/%v", prefixPath, filePath)
 }
