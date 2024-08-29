@@ -1,6 +1,7 @@
 package enki
 
 import (
+	"fmt"
 	"io/fs"
 	"log"
 	"net/http"
@@ -40,9 +41,10 @@ func (ek *Enki) appRoutes() (*Mux, *Mux) {
 	// adding server status check
 	trunkMux.Use(middleware.Heartbeat("/ping"))
 
-	if contextPath == "/" {
-		ek.staticAssets(trunkMux)
+	// NOTE: chi does not like mount static file server in sub route
+	ek.staticAssets(contextPath, trunkMux)
 
+	if contextPath == "/" {
 		return trunkMux, trunkMux
 	}
 
@@ -58,25 +60,36 @@ func (ek *Enki) appRoutes() (*Mux, *Mux) {
 
 	contextMux := chi.NewRouter()
 
-	ek.staticAssets(contextMux)
-
 	trunkMux.Mount(contextPath, contextMux)
 
 	return trunkMux, contextMux
 }
 
-func (ek *Enki) staticAssets(mux *Mux) {
+func (ek *Enki) staticAssets(contextPath string, mux *Mux) {
+	prefixPath := ""
+
+	if contextPath != "/" {
+		prefixPath = contextPath
+	}
+
+	indexPath := fmt.Sprintf("%s/assets/", prefixPath)
+	stripPath := fmt.Sprintf("%s/assets", prefixPath)
+	handlePath := fmt.Sprintf("%s/assets/*", prefixPath)
+
+
+
 	// Disable assets index page
-	mux.Get("/assets/", func(w http.ResponseWriter, r *http.Request){
+	mux.Get(indexPath, func(w http.ResponseWriter, r *http.Request){
 		w.WriteHeader(http.StatusNotFound)
 	})
 
 	if ek.Env != "development" {
 		// Handle static assets for production or test env.
-		mux.Handle("/assets/*", http.StripPrefix("/assets", ek.staticHandler()))
+		mux.Handle(handlePath, http.StripPrefix(stripPath, ek.staticHandler()))
 	} else {
 		// Handle static assets for development env.
-		mux.Handle("/assets/*", http.StripPrefix("/assets", ek.staticHandlerDev()))
+		mux.Handle(handlePath, http.StripPrefix(stripPath, ek.staticHandlerDev()))
+		// mux.Handle("/assets/*", http.StripPrefix("/assets", ek.staticHandlerDev()))
 	}
 }
 
