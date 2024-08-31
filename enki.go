@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"syscall"
 
 	"github.com/JesseChavez/enki/database"
 	"github.com/JesseChavez/enki/session"
@@ -94,6 +95,13 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 
 	// init renderers
 	ek.Render = views.New(ek.Env, contextPath, rootPath, Resources)
+
+	// add shutdown server endpoint
+	ek.Routes.Get("/shutdown", func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Sutdown request")
+		w.Write([]byte("OK"))
+		syscall.Kill(syscall.Getpid(), syscall.SIGINT)
+	})
 }
 
 func (ek *Enki) InitJobApplication() {
