@@ -9,7 +9,7 @@ import (
 
 	"github.com/JesseChavez/enki/database"
 	"github.com/JesseChavez/enki/session"
-	"github.com/JesseChavez/enki/views"
+	"github.com/JesseChavez/enki/renderer"
 	"github.com/JesseChavez/spt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-rel/mssql"
@@ -28,22 +28,22 @@ type Router = chi.Router
 
 type Repository = rel.Repository
 
-type Renderer interface {
+type IRenderer interface {
 	Render(w http.ResponseWriter, r *http.Request, view string, data any)
 }
 
-type SessionStore interface {
+type ISessionStore interface {
 	GetSession(*http.Request) *session.Session
 }
 
 type Enki struct {
-	AppName  string
-	Env      string
-	Routes   *Mux
-	DBConfig database.Config
-	DB       Repository
-	Render   Renderer
-	SessStore SessionStore
+	AppName      string
+	Env          string
+	Routes       *Mux
+	DBConfig     database.Config
+	DB           Repository
+	Renderer     IRenderer
+	SessionStore ISessionStore
 }
 
 var BaseDir string
@@ -88,13 +88,13 @@ func (ek *Enki) Version() string {
 
 func (ek *Enki) InitWebApplication(contextMux *Mux) {
 	// initialize session store
-	ek.SessStore = session.New(sessionKey)
+	ek.SessionStore = session.New(sessionKey)
 
 	// init db
 	intializeDatabase(ek)
 
 	// init renderers
-	ek.Render = views.New(ek.Env, contextPath, rootPath, Resources)
+	ek.Renderer = renderer.New(ek.Env, contextPath, rootPath, Resources)
 
 	// add shutdown server endpoint
 	ek.Routes.Get("/shutdown", func(w http.ResponseWriter, r *http.Request) {
