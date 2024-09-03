@@ -56,7 +56,7 @@ func (ren *Renderer) Render(w http.ResponseWriter, r *http.Request, tmpl string,
 		return
 	}
 
-	err = parsedTmpl.Execute(w, nil)
+	err = parsedTmpl.Execute(w, data)
 
 	if err != nil {
 		log.Println("Error on template exec:", err)

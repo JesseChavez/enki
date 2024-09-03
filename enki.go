@@ -8,8 +8,9 @@ import (
 	"syscall"
 
 	"github.com/JesseChavez/enki/database"
-	"github.com/JesseChavez/enki/session"
+	"github.com/JesseChavez/enki/helper"
 	"github.com/JesseChavez/enki/renderer"
+	"github.com/JesseChavez/enki/session"
 	"github.com/JesseChavez/spt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-rel/mssql"
@@ -32,6 +33,11 @@ type IRenderer interface {
 	Render(w http.ResponseWriter, r *http.Request, view string, data any)
 }
 
+type IHelper interface {
+	RoutePath(string) string
+	AssetPath(string) string
+}
+
 type ISessionStore interface {
 	GetSession(*http.Request) *session.Session
 }
@@ -43,6 +49,7 @@ type Enki struct {
 	DBConfig     database.Config
 	DB           Repository
 	Renderer     IRenderer
+	Helper       IHelper
 	SessionStore ISessionStore
 }
 
@@ -95,6 +102,9 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 
 	// init renderers
 	ek.Renderer = renderer.New(ek.Env, contextPath, rootPath, Resources)
+
+	// init renderers
+	ek.Helper = helper.New(ek.Env, contextPath)
 
 	// add shutdown server endpoint
 	ek.Routes.Get("/shutdown", func(w http.ResponseWriter, r *http.Request) {

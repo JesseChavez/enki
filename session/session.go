@@ -63,3 +63,9 @@ func (s *Session) Set(field string, value any) {
 func (s *Session) Save(w http.ResponseWriter) error {
 	return s.val.Save(s.req, w)
 }
+
+func (s *Session) Delete(w http.ResponseWriter) error {
+	s.val.Options.MaxAge = -1
+
+	return s.val.Save(s.req, w)
+}
