@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 )
 
@@ -20,11 +19,13 @@ type Session struct {
 	val *sessions.Session
 }
 
-func New(name string) *SessionStore {
+func New(name string, authKey string, encrKey string) *SessionStore {
 	store := SessionStore{Name: name}
 
-	authKeyOne := securecookie.GenerateRandomKey(64)
-	encrKeyOne := securecookie.GenerateRandomKey(32)
+	// authKeyOne := securecookie.GenerateRandomKey(64)
+	// encrKeyOne := securecookie.GenerateRandomKey(32)
+	authKeyOne := []byte(authKey)
+	encrKeyOne := []byte(encrKey)
 
 	cstore := sessions.NewCookieStore(authKeyOne, encrKeyOne)
 

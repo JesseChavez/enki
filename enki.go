@@ -16,6 +16,7 @@ import (
 	"github.com/go-rel/mssql"
 	"github.com/go-rel/postgres"
 	"github.com/go-rel/rel"
+	"github.com/gorilla/securecookie"
 
 	_ "github.com/lib/pq"
 	_ "github.com/microsoft/go-mssqldb"
@@ -65,12 +66,18 @@ var WebPort = "3000"
 
 var TimeZone = "UTC"
 
+var SecretAuthKey = string(securecookie.GenerateRandomKey(64))
+var SecretEncrKey = string(securecookie.GenerateRandomKey(32))
+
 // private variables
 var webPort string
 var timeZone string
 var contextPath string
 var sessionKey string
 var rootPath string
+
+var secretAuthKey string
+var secretEncrKey string
 
 func New(name string) Enki {
 	app := Enki{}
@@ -86,6 +93,9 @@ func New(name string) Enki {
 	sessionKey = SessionKey
 	rootPath = BaseDir
 
+	secretAuthKey = SecretAuthKey
+	secretEncrKey = SecretEncrKey
+
 	return app
 }
 
@@ -95,7 +105,7 @@ func (ek *Enki) Version() string {
 
 func (ek *Enki) InitWebApplication(contextMux *Mux) {
 	// initialize session store
-	ek.SessionStore = session.New(sessionKey)
+	ek.SessionStore = session.New(sessionKey, secretAuthKey, secretEncrKey)
 
 	// init db
 	intializeDatabase(ek)
