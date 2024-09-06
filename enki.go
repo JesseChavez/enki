@@ -37,6 +37,7 @@ type IRenderer interface {
 type IHelper interface {
 	RoutePath(string) string
 	AssetPath(string) string
+	URLParam(*http.Request, string) string
 }
 
 type ISessionStore interface {

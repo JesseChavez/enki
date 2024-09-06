@@ -1,6 +1,11 @@
 package helper
 
-import "fmt"
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/go-chi/chi/v5"
+)
 
 type Helper struct {
 	env        string
@@ -28,4 +33,11 @@ func (hp *Helper) RoutePath(path string) string {
 
 func (hp *Helper) AssetPath(fileName string) string {
 	return fmt.Sprintf("%s/assets/%v", hp.prefixPath, fileName)
+}
+
+// URLParam returns the url parameter from a http.Request object.
+func (hp *Helper) URLParam(r *http.Request, key string) string {
+	value := chi.URLParam(r, key)
+
+	return value
 }
