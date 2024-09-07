@@ -9,6 +9,7 @@ import (
 
 	"github.com/JesseChavez/enki/database"
 	"github.com/JesseChavez/enki/helper"
+	"github.com/JesseChavez/enki/logger"
 	"github.com/JesseChavez/enki/renderer"
 	"github.com/JesseChavez/enki/session"
 	"github.com/JesseChavez/spt"
@@ -30,6 +31,14 @@ type Router = chi.Router
 
 type Repository = rel.Repository
 
+type ILogger interface {
+	Debug(msg string, keysAndValues ...interface{})
+	Info(msg string, keysAndValues ...interface{})
+	Warn(msg string, keysAndValues ...interface{})
+	Error(msg string, keysAndValues ...interface{})
+	Fatal(msg string, keysAndValues ...interface{})
+}
+
 type IRenderer interface {
 	Render(w http.ResponseWriter, r *http.Request, view string, data any)
 }
@@ -50,6 +59,7 @@ type Enki struct {
 	Routes       *Mux
 	DBConfig     database.Config
 	DB           Repository
+	Logger       ILogger
 	Renderer     IRenderer
 	Helper       IHelper
 	SessionStore ISessionStore
@@ -109,6 +119,9 @@ func (ek *Enki) Version() string {
 }
 
 func (ek *Enki) InitWebApplication(contextMux *Mux) {
+	// init logger
+	ek.Logger = logger.New()
+
 	// initialize session store
 	ek.SessionStore = session.New(sessionKey, sessionMaxAge, secretAuthKey, secretEncrKey)
 
