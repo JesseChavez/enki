@@ -19,7 +19,7 @@ type Session struct {
 	val *sessions.Session
 }
 
-func New(name string, authKey string, encrKey string) *SessionStore {
+func New(name string, maxAge int, authKey string, encrKey string) *SessionStore {
 	store := SessionStore{Name: name}
 
 	// authKeyOne := securecookie.GenerateRandomKey(64)
@@ -29,9 +29,10 @@ func New(name string, authKey string, encrKey string) *SessionStore {
 
 	cstore := sessions.NewCookieStore(authKeyOne, encrKeyOne)
 
+	// MaxAge unit is seconds
 	cstore.Options = &sessions.Options{
 		Path:     "/",
-		MaxAge:   60 * 15,
+		MaxAge:   60 * maxAge,
 		HttpOnly: true,
 	}
 

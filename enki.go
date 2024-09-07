@@ -63,6 +63,8 @@ var ContextPath = "/"
 
 var SessionKey = "_enki_session"
 
+var SessionMaxAge = 30
+
 var WebPort = "3000"
 
 var TimeZone = "UTC"
@@ -75,6 +77,7 @@ var webPort string
 var timeZone string
 var contextPath string
 var sessionKey string
+var sessionMaxAge int
 var rootPath string
 
 var secretAuthKey string
@@ -92,6 +95,7 @@ func New(name string) Enki {
 	timeZone = TimeZone
 	contextPath = ContextPath
 	sessionKey = SessionKey
+	sessionMaxAge = SessionMaxAge
 	rootPath = BaseDir
 
 	secretAuthKey = SecretAuthKey
@@ -106,7 +110,7 @@ func (ek *Enki) Version() string {
 
 func (ek *Enki) InitWebApplication(contextMux *Mux) {
 	// initialize session store
-	ek.SessionStore = session.New(sessionKey, secretAuthKey, secretEncrKey)
+	ek.SessionStore = session.New(sessionKey, sessionMaxAge, secretAuthKey, secretEncrKey)
 
 	// init db
 	intializeDatabase(ek)
