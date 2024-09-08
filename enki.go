@@ -1,11 +1,15 @@
 package enki
 
 import (
+	"context"
 	"embed"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"syscall"
+	"time"
 
 	"github.com/JesseChavez/enki/database"
 	"github.com/JesseChavez/enki/helper"
@@ -199,6 +203,26 @@ func intializeDatabase(ek *Enki) {
 	Shutdown = append(Shutdown, adapter.Close)
 
 	ek.DB = rel.New(adapter)
+	ek.DB.Instrumentation(func(ctx context.Context, op string, message string, args ...any) func(err error) {
+		// no op for rel functions.
+		if strings.HasPrefix(op, "rel-") {
+			return func(error) {}
+		}
+
+		t := time.Now()
+
+		return func(err error) {
+			duration := time.Since(t)
+			stats := "[duration: " + fmt.Sprint(duration) + " op: " + op + "]"
+
+			if err != nil {
+				ek.Logger.Error(message, "stat", stats, "err", err)
+			} else {
+				ek.Logger.Info(message, "stat", stats)
+			}
+		}
+	})
+
 	// repo.Ping(context.TODO())
 }
 
