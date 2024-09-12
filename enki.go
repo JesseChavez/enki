@@ -142,7 +142,15 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 	ek.Routes.Get("/shutdown", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Sutdown request")
 		w.Write([]byte("OK"))
-		syscall.Kill(syscall.Getpid(), syscall.SIGINT)
+
+		p, err := os.FindProcess(os.Getpid())
+
+		if err != nil {
+			log.Println("Error finding process", err)
+		}
+
+		// syscall.Kill(syscall.Getpid(), syscall.SIGINT)
+		p.Signal(syscall.SIGTERM)
 	})
 }
 
