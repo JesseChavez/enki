@@ -34,7 +34,8 @@ func (ek *Enki) ListenAndServe() {
 
 	ctx := context.Background()
 
-	go gracefulShutdown(ctx, server, halt)
+	go sigGracefulShutdown(ctx, server, halt)
+	go apiGracefulShutdown(ctx, server, halt)
 
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		// Error starting or closing listener:

@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/JesseChavez/enki/database"
@@ -145,14 +144,8 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 		log.Println("Sutdown request")
 		w.Write([]byte("OK"))
 
-		p, err := os.FindProcess(os.Getpid())
 
-		if err != nil {
-			log.Println("Error finding process", err)
-		}
-
-		// syscall.Kill(syscall.Getpid(), syscall.SIGINT)
-		p.Signal(syscall.SIGTERM)
+		StatusCode <- "stop"
 	})
 }
 
