@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
@@ -110,7 +111,8 @@ func New(name string) Enki {
 	contextPath = ContextPath
 	sessionKey = SessionKey
 	sessionMaxAge = SessionMaxAge
-	rootPath = BaseDir
+
+	rootPath = workingDir()
 
 	secretAuthKey = SecretAuthKey
 	secretEncrKey = SecretEncrKey
@@ -165,11 +167,11 @@ func (enki *Enki) fetchEnvironment() string {
 
 	switch env {
 	case "development":
-		// do something
+	// do something
 	case "production":
-		// do something
+	// do something
 	case "test":
-		// do something
+	// do something
 	default:
 		log.Fatalf("Invalid environment '%v'", env)
 	}
@@ -198,7 +200,7 @@ func intializeDatabase(ek *Enki) {
 	case "postgres":
 		adapter, err = postgres.Open(url)
 	case "sqlite3":
-		// adapter, err = sqlite3.Open(url)
+	// adapter, err = sqlite3.Open(url)
 	default:
 		log.Fatalf("Invalid adapter '%v'", adapterName)
 	}
@@ -262,4 +264,26 @@ func dbConfigFile(env string) []byte {
 	}
 
 	return file
+}
+
+func workingDir() string {
+	exec, err := os.Executable()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	dir := filepath.Dir(exec)
+
+	// detect `go run` otherwise is deployable artifact
+	if !strings.Contains(dir, "go-build") {
+		return filepath.Dir(exec)
+	}
+
+	path, err := os.Getwd()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return path
 }
