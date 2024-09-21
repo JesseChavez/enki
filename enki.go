@@ -44,7 +44,7 @@ type ILogger interface {
 }
 
 type IRenderer interface {
-	Render(w http.ResponseWriter, r *http.Request, view string, data any)
+	RenderHTML(w http.ResponseWriter, r *http.Request, view string, data any)
 }
 
 type IHelper interface {

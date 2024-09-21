@@ -48,7 +48,7 @@ func New(env string, contextPath string, rootPath string, files embed.FS) *Rende
 	return &renderer
 }
 
-func (ren *Renderer) Render(w http.ResponseWriter, r *http.Request, tmpl string, data any) {
+func (ren *Renderer) RenderHTML(w http.ResponseWriter, r *http.Request, tmpl string, data any) {
 	parsedTmpl, err := ren.fetchTemplate(tmpl)
 
 	if err != nil {
