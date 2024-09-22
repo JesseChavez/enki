@@ -53,7 +53,7 @@ func New(env string, contextPath string, rootPath string, files embed.FS) *Rende
 	return &renderer
 }
 
-func (ren *Renderer) RenderHTML(w http.ResponseWriter, r *http.Request, tmpl string, data any) {
+func (ren *Renderer) RenderHTML(w http.ResponseWriter, status int, tmpl string, data any) {
 	parsedTmpl, err := ren.fetchTemplate(tmpl)
 
 	if err != nil {
@@ -68,10 +68,14 @@ func (ren *Renderer) RenderHTML(w http.ResponseWriter, r *http.Request, tmpl str
 		return
 	}
 
+	w.Header().Set("Content-Type", "text/html; charset=" + charset)
+
+	w.WriteHeader(status)
+
 	// log.Println("rendering ...")
 }
 
-func (ren *Renderer) RenderXML(w http.ResponseWriter, r *http.Request, tmpl string, data any) {
+func (ren *Renderer) RenderXML(w http.ResponseWriter, status int, tmpl string, data any) {
 	parsedTmpl, err := ren.fetchTemplate(tmpl)
 
 	if err != nil {
@@ -89,6 +93,8 @@ func (ren *Renderer) RenderXML(w http.ResponseWriter, r *http.Request, tmpl stri
 	}
 
 	w.Header().Set("Content-Type", "text/xml; charset=" + charset)
+
+	w.WriteHeader(status)
 
 	w.Write([]byte(xmlHeader + buf.String()))
 
