@@ -1,6 +1,7 @@
 package renderer
 
 import (
+	"bytes"
 	"embed"
 	"encoding/json"
 	"errors"
@@ -23,6 +24,10 @@ type Renderer struct {
 }
 
 var prefixPath = ""
+
+var charset = "utf-8"
+
+var xmlHeader = `<?xml version="1.0" encoding="utf-8"?>` + "\n"
 
 var envRender string
 
@@ -62,6 +67,30 @@ func (ren *Renderer) RenderHTML(w http.ResponseWriter, r *http.Request, tmpl str
 		log.Println("Error on template exec:", err)
 		return
 	}
+
+	// log.Println("rendering ...")
+}
+
+func (ren *Renderer) RenderXML(w http.ResponseWriter, r *http.Request, tmpl string, data any) {
+	parsedTmpl, err := ren.fetchTemplate(tmpl)
+
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	buf := new(bytes.Buffer)
+
+	err = parsedTmpl.Execute(buf, data)
+
+	if err != nil {
+		log.Println("Error on template exec:", err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/xml; charset=" + charset)
+
+	w.Write([]byte(xmlHeader + buf.String()))
 
 	// log.Println("rendering ...")
 }
