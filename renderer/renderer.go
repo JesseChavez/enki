@@ -15,6 +15,13 @@ import (
 	"strings"
 )
 
+type EnkiView struct {
+	Template string
+	MimeType string
+	Charset  string
+	Data     any
+}
+
 type Renderer struct {
 	env        string
 	prefixPath string
@@ -25,9 +32,11 @@ type Renderer struct {
 
 var prefixPath = ""
 
-var charset = "utf-8"
+var defaultMimeType = "text/html"
 
-var xmlHeader = `<?xml version="1.0" encoding="utf-8"?>` + "\n"
+var defaultCharset = "utf-8"
+
+var xmlDeclaration = `<?xml version="1.0" encoding="utf-8"?>` + "\n"
 
 var envRender string
 
@@ -53,13 +62,21 @@ func New(env string, contextPath string, rootPath string, files embed.FS) *Rende
 	return &renderer
 }
 
-func (ren *Renderer) RenderHTML(w http.ResponseWriter, status int, tmpl string, data any) {
+func (ren *Renderer) Render(w http.ResponseWriter, status int, view *EnkiView) {
+	tmpl := view.Template
+
 	parsedTmpl, err := ren.fetchTemplate(tmpl)
 
 	if err != nil {
 		log.Println(err)
 		return
 	}
+
+	data := view.Data
+
+	w.Header().Set("Content-Type", ren.contentTypeHeader(view.MimeType, view.Charset))
+
+	w.WriteHeader(status)
 
 	err = parsedTmpl.Execute(w, data)
 
@@ -68,9 +85,27 @@ func (ren *Renderer) RenderHTML(w http.ResponseWriter, status int, tmpl string, 
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/html; charset=" + charset)
+	// log.Println("rendering ...")
+}
+
+func (ren *Renderer) RenderHTML(w http.ResponseWriter, status int, tmpl string, data any) {
+	parsedTmpl, err := ren.fetchTemplate(tmpl)
+
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=" + defaultCharset)
 
 	w.WriteHeader(status)
+
+	err = parsedTmpl.Execute(w, data)
+
+	if err != nil {
+		log.Println("Error on template exec:", err)
+		return
+	}
 
 	// log.Println("rendering ...")
 }
@@ -92,11 +127,11 @@ func (ren *Renderer) RenderXML(w http.ResponseWriter, status int, tmpl string, d
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/xml; charset=" + charset)
+	w.Header().Set("Content-Type", "text/xml; charset=" + defaultCharset)
 
 	w.WriteHeader(status)
 
-	w.Write([]byte(xmlHeader + buf.String()))
+	w.Write([]byte(xmlDeclaration + buf.String()))
 
 	// log.Println("rendering ...")
 }
@@ -270,4 +305,18 @@ func (ren *Renderer) loadManifestDev() error {
 	}
 
 	return nil
+}
+
+func (ren *Renderer) contentTypeHeader(mimeType string, charset string) string {
+	if mimeType == "" {
+		mimeType = defaultMimeType
+	}
+
+	if charset == "" {
+		charset = defaultCharset
+	}
+
+	contentType := mimeType + "; charset=" + charset
+
+	return contentType
 }

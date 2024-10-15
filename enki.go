@@ -35,6 +35,7 @@ type Router = chi.Router
 
 type Repository = rel.Repository
 
+
 type ILogger interface {
 	Debug(msg string, keysAndValues ...interface{})
 	Info(msg string, keysAndValues ...interface{})
@@ -44,6 +45,7 @@ type ILogger interface {
 }
 
 type IRenderer interface {
+	Render(w http.ResponseWriter, status int, view *renderer.EnkiView)
 	RenderHTML(w http.ResponseWriter, status int, view string, data any)
 	RenderXML(w http.ResponseWriter, status int, view string, data any)
 }
