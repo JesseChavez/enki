@@ -9,7 +9,7 @@ require (
 	github.com/go-rel/postgres v0.12.0
 	github.com/go-rel/rel v0.42.0
 	github.com/gorilla/securecookie v1.1.2
-	github.com/gorilla/sessions v1.3.0
+	github.com/gorilla/sessions v1.4.0
 	github.com/lib/pq v1.10.9
 	github.com/microsoft/go-mssqldb v1.7.1
 	gopkg.in/yaml.v3 v3.0.1
