@@ -1,6 +1,6 @@
 module github.com/JesseChavez/enki
 
-go 1.22.4
+go 1.24.2
 
 require (
 	github.com/JesseChavez/spt v0.1.0
