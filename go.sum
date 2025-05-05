@@ -19,6 +19,8 @@ github.com/fsnotify/fsnotify v1.6.0 h1:n+5WquG0fcWoWp6xPWfHdbskMCQaFnG6PfBrh1Ky4
 github.com/fsnotify/fsnotify v1.6.0/go.mod h1:sl3t1tCWJFWoRz9R8WJCbQihKKwmorjAbSClcnxKAGw=
 github.com/go-chi/chi/v5 v5.1.0 h1:acVI1TYaD+hhedDJ3r54HyA6sExp3HfXq7QWEEY/xMw=
 github.com/go-chi/chi/v5 v5.1.0/go.mod h1:DslCQbL2OYiznFReuXYUmQ2hGd1aDpCnlMNITLSKoi8=
+github.com/go-chi/chi/v5 v5.2.1 h1:KOIHODQj58PmL80G2Eak4WdvUzjSJSm0vG72crDCqb8=
+github.com/go-chi/chi/v5 v5.2.1/go.mod h1:L2yAIGWB3H+phAw1NxKwWM+7eUH/lU8pOMm5hHcoops=
 github.com/go-rel/mssql v0.13.0 h1:TfE7UKHfsjqr2P59MvlFbx6AG89zs5JtP6uoHI9u1BA=
 github.com/go-rel/mssql v0.13.0/go.mod h1:2XDBNb+eZ+EYyfjmykQ0KjD8Lj2I181A41FaB4d3hLM=
 github.com/go-rel/postgres v0.12.0 h1:Y1dfqpsD1sVUq5HbUN+u5XkDBnaRwyRFnZ8ul34hSp4=

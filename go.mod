@@ -4,7 +4,7 @@ go 1.24.2
 
 require (
 	github.com/JesseChavez/spt v0.1.0
-	github.com/go-chi/chi/v5 v5.1.0
+	github.com/go-chi/chi/v5 v5.2.1
 	github.com/go-rel/mssql v0.13.0
 	github.com/go-rel/postgres v0.12.0
 	github.com/go-rel/rel v0.42.0
