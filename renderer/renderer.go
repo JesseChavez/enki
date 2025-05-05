@@ -290,7 +290,7 @@ func (ren *Renderer) loadManifest() error {
 }
 
 func (ren *Renderer) loadManifestDev() error {
-	mpath := ren.rootPath + "/frontend/builds/manifest.json"
+	mpath := ren.rootPath + "/tmp/assets/manifest.json"
 
 	mfile, err := os.ReadFile(mpath)
 
