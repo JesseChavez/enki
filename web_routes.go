@@ -117,10 +117,10 @@ func (ek *Enki) staticHandler() http.HandlerFunc {
 }
 
 func (ek *Enki) staticHandlerDev() http.HandlerFunc {
-	publicDir := rootPath + "/frontend/builds"
+	publicDir := rootPath + "/tmp/assets"
 
 	if  _, err := os.Stat(publicDir); os.IsNotExist(err) {
-		log.Fatal("invalid public folder, ", err)
+		log.Fatal("invalid development public folder, ", err)
 	}
 
 	fileServer := http.FileServer(http.Dir(publicDir))
