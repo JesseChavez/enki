@@ -8,6 +8,7 @@ import (
 var funcMap = template.FuncMap{
 	"stylesheetPath": stylesheetPath,
 	"javascriptPath": javascriptPath,
+	"assetPath": assetPath,
 }
 
 func stylesheetPath(assetName string) string {
