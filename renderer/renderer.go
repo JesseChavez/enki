@@ -15,13 +15,6 @@ import (
 	"strings"
 )
 
-type EnkiView struct {
-	Template string
-	MimeType string
-	Charset  string
-	Data     any
-}
-
 type Renderer struct {
 	env        string
 	prefixPath string
@@ -31,10 +24,6 @@ type Renderer struct {
 }
 
 var prefixPath = ""
-
-var defaultMimeType = "text/html"
-
-var defaultCharset = "utf-8"
 
 var xmlDeclaration = `<?xml version="1.0" encoding="utf-8"?>` + "\n"
 
@@ -62,8 +51,8 @@ func New(env string, contextPath string, rootPath string, files embed.FS) *Rende
 	return &renderer
 }
 
-func (ren *Renderer) Render(w http.ResponseWriter, status int, view *EnkiView) {
-	tmpl := view.Template
+func (ren *Renderer) Render(w http.ResponseWriter, status int, meta map[string]string, data any) {
+	tmpl := meta["template"]
 
 	parsedTmpl, err := ren.fetchTemplate(tmpl)
 
@@ -72,9 +61,7 @@ func (ren *Renderer) Render(w http.ResponseWriter, status int, view *EnkiView) {
 		return
 	}
 
-	data := view.Data
-
-	w.Header().Set("Content-Type", ren.contentTypeHeader(view.MimeType, view.Charset))
+	w.Header().Set("Content-Type", ren.contentTypeHeader(meta["mime_type"], meta["charset"]))
 
 	w.WriteHeader(status)
 
@@ -96,7 +83,7 @@ func (ren *Renderer) RenderHTML(w http.ResponseWriter, status int, tmpl string, 
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/html; charset=" + defaultCharset)
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	w.WriteHeader(status)
 
@@ -127,7 +114,7 @@ func (ren *Renderer) RenderXML(w http.ResponseWriter, status int, tmpl string, d
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/xml; charset=" + defaultCharset)
+	w.Header().Set("Content-Type", "text/xml; charset=utf-8")
 
 	w.WriteHeader(status)
 
@@ -308,14 +295,6 @@ func (ren *Renderer) loadManifestDev() error {
 }
 
 func (ren *Renderer) contentTypeHeader(mimeType string, charset string) string {
-	if mimeType == "" {
-		mimeType = defaultMimeType
-	}
-
-	if charset == "" {
-		charset = defaultCharset
-	}
-
 	contentType := mimeType + "; charset=" + charset
 
 	return contentType

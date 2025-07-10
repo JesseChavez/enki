@@ -12,10 +12,9 @@ import (
 	"time"
 
 	"github.com/JesseChavez/enki/database"
-	"github.com/JesseChavez/enki/helper"
 	"github.com/JesseChavez/enki/logger"
-	"github.com/JesseChavez/enki/renderer"
 	"github.com/JesseChavez/enki/session"
+	"github.com/JesseChavez/enki/view"
 	"github.com/JesseChavez/spt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-rel/mssql"
@@ -35,6 +34,7 @@ type Router = chi.Router
 
 type Repository = rel.Repository
 
+type ActionView = view.ActionView
 
 type ILogger interface {
 	Debug(msg string, keysAndValues ...interface{})
@@ -44,16 +44,13 @@ type ILogger interface {
 	Fatal(msg string, keysAndValues ...interface{})
 }
 
-type IRenderer interface {
-	Render(w http.ResponseWriter, status int, view *renderer.EnkiView)
-	RenderHTML(w http.ResponseWriter, status int, view string, data any)
-	RenderXML(w http.ResponseWriter, status int, view string, data any)
-}
-
-type IHelper interface {
+type IViewSupport interface {
 	RoutePath(string) string
 	AssetPath(string) string
 	URLParam(*http.Request, string) string
+	Render(w http.ResponseWriter, status int, view *ActionView)
+	RenderHTML(w http.ResponseWriter, status int, view *ActionView)
+	RenderXML(w http.ResponseWriter, status int, view *ActionView)
 }
 
 type ISessionStore interface {
@@ -67,10 +64,10 @@ type Enki struct {
 	DBConfig     database.Config
 	DB           Repository
 	Logger       ILogger
-	Renderer     IRenderer
-	Helper       IHelper
 	SessionStore ISessionStore
+	ViewSupport  IViewSupport
 }
+
 
 var BaseDir string
 
@@ -136,11 +133,8 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 	// init db
 	intializeDatabase(ek)
 
-	// init renderers
-	ek.Renderer = renderer.New(ek.Env, contextPath, rootPath, Resources)
-
-	// init renderers
-	ek.Helper = helper.New(ek.Env, contextPath)
+	// init support (renderer and helpers)
+	ek.ViewSupport = view.New(ek.Env, contextPath, rootPath, Resources)
 
 	// add shutdown server endpoint
 	ek.Routes.Get("/shutdown", func(w http.ResponseWriter, r *http.Request) {
