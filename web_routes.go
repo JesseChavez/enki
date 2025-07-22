@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -28,6 +29,10 @@ func (ek *Enki) NewRouter() *Mux {
 
 func (ek *Enki) appRoutes() (*Mux, *Mux) {
 	trunkMux := chi.NewRouter()
+
+	// adding rest verbs support for standard forms
+	// it needs to be before logger to log the right action method
+	trunkMux.Use(methodSpoofing)
 
 	// adding to log request details
 	trunkMux.Use(middleware.Logger)
@@ -130,4 +135,27 @@ func (ek *Enki) staticHandlerDev() http.HandlerFunc {
 
 		fileServer.ServeHTTP(w, r)
 	}
+}
+
+// MethodSpoofing allows to spoof PUT, PATCH and DELETE methods from HTML forms,
+// using the _method field. <input type="hidden" name="_method" value="PUT">
+func methodSpoofing(next http.Handler) http.Handler {
+	// fmt.Println("-----> method spoofing")
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// fmt.Println("-----> method spoofing:", r.Method, http.MethodPost)
+		if r.Method == http.MethodPost {
+			method := strings.ToLower(r.PostFormValue("_method"))
+			switch method {
+			case "put":
+				r.Method = http.MethodPut
+			case "patch":
+				r.Method = http.MethodPatch
+			case "delete":
+				r.Method = http.MethodDelete
+			default:
+			}
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
