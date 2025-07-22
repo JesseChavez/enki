@@ -9,6 +9,7 @@ var funcMap = template.FuncMap{
 	"stylesheetPath": stylesheetPath,
 	"javascriptPath": javascriptPath,
 	"assetPath": assetPath,
+	"routePath": routePath,
 }
 
 func stylesheetPath(assetName string) string {
@@ -33,4 +34,8 @@ func assetPath(assetName string) string {
 	filePath := Manifest[key]
 
 	return fmt.Sprintf("%s/assets/%v", prefixPath, filePath)
+}
+
+func routePath(path string) string {
+	return fmt.Sprintf("%s/%v", prefixPath, path)
 }
