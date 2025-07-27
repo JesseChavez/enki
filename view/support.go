@@ -58,7 +58,11 @@ func (supp *ViewSupport) Render(w http.ResponseWriter, status int, view *ActionV
 	meta["mime_type"] = supp.defaultValue(view.MimeType, defaultMimeType)
 	meta["charset"]   = supp.defaultValue(view.Charset, defaultCharset)
 
-	supp.Renderer.Render(w, status, meta, view.Data)
+	if supp.csr {
+		supp.Renderer.Render(w, status, meta, marshalData(view))
+	} else {
+		supp.Renderer.Render(w, status, meta, view.Data)
+	}
 }
 
 func (supp *ViewSupport) RenderHTML(w http.ResponseWriter, status int, view *ActionView) {
@@ -94,4 +98,40 @@ func (supp *ViewSupport) defaultValue(value string, fallback string) string {
 	}
 
 	return value
+}
+
+func marshalData(view *ActionView) any {
+	spec := ViewSpec{
+		SpecID: view.Name + "-" + randomHex(8),
+		Name: view.Name,
+	}
+
+	out, err := json.MarshalIndent(view.Data, "", "  ")
+
+	data := "{}"
+
+	if err == nil {
+		data = string(out)
+	}
+
+	if view.Debug {
+		log.Printf("Data: %s\n", data)
+	}
+
+	spec.Data = template.JS(data)
+
+	return &spec
+}
+
+func randomHex(n int) (string) {
+	bytes := make([]byte, n)
+
+	_, err := rand.Read(bytes);
+
+	if err != nil {
+		log.Println("Error generation random hex:", err)
+		return "0"
+	}
+
+	return hex.EncodeToString(bytes)
 }
