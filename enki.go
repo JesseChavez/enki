@@ -86,6 +86,10 @@ var TimeZone = "UTC"
 var SecretAuthKey = string(securecookie.GenerateRandomKey(64))
 var SecretEncrKey = string(securecookie.GenerateRandomKey(32))
 
+var API = false
+
+var CSR = false
+
 // private variables
 var webPort string
 var timeZone string
@@ -96,6 +100,8 @@ var rootPath string
 
 var secretAuthKey string
 var secretEncrKey string
+var api bool
+var csr bool
 
 func New(name string) Enki {
 	app := Enki{}
@@ -115,6 +121,8 @@ func New(name string) Enki {
 
 	secretAuthKey = SecretAuthKey
 	secretEncrKey = SecretEncrKey
+	api = API
+	csr = CSR
 
 	return app
 }
@@ -134,7 +142,7 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 	intializeDatabase(ek)
 
 	// init support (renderer and helpers)
-	ek.ViewSupport = view.New(ek.Env, contextPath, rootPath, Resources)
+	ek.ViewSupport = view.New(ek.Env, api, csr, contextPath, rootPath, Resources)
 
 	// add shutdown server endpoint
 	ek.Routes.Get("/shutdown", func(w http.ResponseWriter, r *http.Request) {

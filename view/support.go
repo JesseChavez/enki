@@ -1,24 +1,38 @@
 package view
 
 import (
+	"crypto/rand"
 	"embed"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"html/template"
+	"log"
 	"net/http"
+
 	"github.com/JesseChavez/enki/renderer"
 	"github.com/go-chi/chi/v5"
 )
 
 type ViewSupport struct {
 	env        string
+	api        bool
+	csr        bool
 	prefixPath string
 	Renderer   *renderer.Renderer
+}
+
+type ViewSpec struct {
+	SpecID string
+	Name   string
+	Data   template.JS
 }
 
 var defaultMimeType = "text/html"
 
 var defaultCharset = "utf-8"
 
-func New(env string, contextPath string, rootPath string, files embed.FS) *ViewSupport {
+func New(env string, api bool, csr bool, contextPath string, rootPath string, files embed.FS) *ViewSupport {
 	prefixPath := ""
 
 	if contextPath != "/" {
@@ -27,6 +41,8 @@ func New(env string, contextPath string, rootPath string, files embed.FS) *ViewS
 
 	support := ViewSupport{
 		env:        env,
+		api:        api,
+		csr:        csr,
 		prefixPath: prefixPath,
 		Renderer: renderer.New(env, contextPath, rootPath, files),
 	}
