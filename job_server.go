@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"reflect"
 	"runtime"
 
 	"github.com/JesseChavez/enki/job"
@@ -36,4 +37,39 @@ func (ek *Enki) StartAndProcess() {
 	}
 
 	<-halt
+}
+
+func (ek *Enki) StartAndWork() {
+	initArgs := os.Args[2:]
+
+	log.Println("Work args:", initArgs)
+
+	jobString := initArgs[0]
+
+	log.Println("Job:", jobString)
+
+	jobType := ek.Queues.List[jobString]
+
+	if jobType == nil {
+		log.Println("Job not defined:", jobString)
+		return
+	}
+
+	job := reflect.New(jobType)
+
+	// log.Println("Registered Job:", job)
+
+	method := job.MethodByName("Perform")
+
+	if !method.IsValid() {
+		log.Println("Perform not defined")
+		return
+	}
+
+	// Prepare arguments for the method call
+	// args := []reflect.Value{reflect.ValueOf("my args?")}
+	args := []reflect.Value{}
+
+	// Call the method
+	method.Call(args)
 }

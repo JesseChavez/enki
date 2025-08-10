@@ -61,6 +61,7 @@ type Enki struct {
 	AppName      string
 	Env          string
 	Routes       *Mux
+	Queues       *Queues
 	DBConfig     database.Config
 	DB           Repository
 	Logger       ILogger
