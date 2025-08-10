@@ -21,7 +21,7 @@ func (ek *Enki) ListenAndServe() {
 		WriteTimeout: 600 * time.Second,
 	}
 
-	log.Println("Web Applications is starting...")
+	log.Println("Web Application is starting...")
 	log.Println("* Enki version:", ek.Version())
 	log.Println("*  Environment:", ek.Env)
 	log.Println("*    Time zone:", timeZone)

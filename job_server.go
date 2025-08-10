@@ -2,6 +2,6 @@ package enki
 
 import "log"
 
-func (enki *Enki) StartAndProcess() {
+func (ek *Enki) StartAndProcess() {
 	log.Println("Starting BG jobs ...")
 }

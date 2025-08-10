@@ -3,17 +3,20 @@ package enki
 import (
 	"context"
 	"log"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
+type ServerWrapper interface {
+	Shutdown(ctx context.Context) error
+}
+
 var Shutdown []func() error
 
 var StatusCode = make(chan string)
 
-func sigGracefulShutdown(ctx context.Context, server *http.Server, halt chan struct{}) {
+func sigGracefulShutdown(ctx context.Context, server ServerWrapper, halt chan struct{}) {
 	sigint := make(chan os.Signal, 1)
 
 	signal.Notify(sigint, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
@@ -24,7 +27,7 @@ func sigGracefulShutdown(ctx context.Context, server *http.Server, halt chan str
 	gracefulShutdown(ctx, server, halt)
 }
 
-func apiGracefulShutdown(ctx context.Context, server *http.Server, halt chan struct{}) {
+func apiGracefulShutdown(ctx context.Context, server ServerWrapper, halt chan struct{}) {
 	<-StatusCode
 
 	log.Println("API signal, shutdown server")
@@ -32,7 +35,7 @@ func apiGracefulShutdown(ctx context.Context, server *http.Server, halt chan str
 	gracefulShutdown(ctx, server, halt)
 }
 
-func gracefulShutdown(ctx context.Context, server *http.Server, halt chan struct{}) {
+func gracefulShutdown(ctx context.Context, server ServerWrapper, halt chan struct{}) {
 	log.Println("shutting down server gracefully")
 
 	// stop receiving any request.
