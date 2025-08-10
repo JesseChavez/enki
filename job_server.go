@@ -1,7 +1,39 @@
 package enki
 
-import "log"
+import (
+	"context"
+	"log"
+	"os"
+	"runtime"
+
+	"github.com/JesseChavez/enki/job"
+)
 
 func (ek *Enki) StartAndProcess() {
+	server := &job.JobExecutor{
+		Env:  ek.Env,
+	}
+
+	log.Println("Job Application is starting...")
+	log.Println("* Enki version:", ek.Version())
+	log.Println("*  Environment:", ek.Env)
+	log.Println("*    Time zone:", timeZone)
+	log.Println("*   Go version:", runtime.Version())
+	log.Println("*   Process ID:", os.Getpid())
+	log.Println("Use Ctrl-C to stop")
 	log.Println("Starting BG jobs ...")
+
+	halt := make(chan struct{})
+
+	ctx := context.Background()
+
+	go sigGracefulShutdown(ctx, server, halt)
+	// go apiGracefulShutdown(ctx, server, halt)
+
+	if err := server.StartAndProcess(); err != nil {
+		// Error starting or closing listener:
+		log.Fatalf("Job server StartAndProcess: %v", err)
+	}
+
+	<-halt
 }

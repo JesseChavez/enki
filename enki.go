@@ -155,6 +155,11 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 }
 
 func (ek *Enki) InitJobApplication() {
+	// init logger
+	ek.Logger = logger.New()
+
+	// init db
+	intializeDatabase(ek)
 }
 
 func (ek *Enki) InitDbMigration() {
