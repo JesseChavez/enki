@@ -167,7 +167,7 @@ func (ek *Enki) InitDbMigration() {
 }
 
 func (enki *Enki) fetchEnvironment() string {
-	env := spt.FetchEnv("ENKI_ENV", "development")
+	env := spt.FetchEnv("APP_ENV", "development")
 
 	switch env {
 	case "development":
@@ -250,7 +250,15 @@ func (ek *Enki) NewDBConfig() database.EnvConfig {
 
 func dbConfigFile(env string) []byte {
 	if env == "production" {
-		file, err := os.ReadFile(rootPath + "/database.yml")
+		file, err := os.ReadFile("/var/local/config/database.yml")
+
+		if err == nil {
+			return file
+		}
+
+		log.Println("File not found, trying in working directory")
+
+		file, err = os.ReadFile(rootPath + "/database.yml")
 
 		if err == nil {
 			return file
