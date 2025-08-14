@@ -241,41 +241,11 @@ func intializeDatabase(ek *Enki) {
 }
 
 func (ek *Enki) NewDBConfig() database.EnvConfig {
-	blob := dbConfigFile(ek.Env)
+	blob := database.ConfigFile(ek.Env, rootPath, Resources)
 
 	config := database.NewConfig(blob, ek.Env)
 
 	return config
-}
-
-func dbConfigFile(env string) []byte {
-	if env == "production" {
-		file, err := os.ReadFile("/var/local/config/database.yml")
-
-		if err == nil {
-			return file
-		}
-
-		log.Println("File not found, trying in working directory")
-
-		file, err = os.ReadFile(rootPath + "/database.yml")
-
-		if err == nil {
-			return file
-		}
-
-		log.Println("File not found, trying embeded file")
-	}
-
-	file, err := Resources.ReadFile("config/database.yml")
-
-	log.Println("Project root:", rootPath)
-
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	return file
 }
 
 func workingDir() string {

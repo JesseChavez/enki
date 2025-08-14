@@ -1,7 +1,9 @@
 package database
 
 import (
+	"embed"
 	"log"
+	"os"
 
 	"gopkg.in/yaml.v3"
 )
@@ -75,4 +77,34 @@ func (conf *EnvConfig) GetEnv(env string) Config {
 	}
 
 	return params
+}
+
+func ConfigFile(env string, rootPath string, resources embed.FS) []byte {
+	if env == "production" {
+		file, err := os.ReadFile("/var/local/config/database.yml")
+
+		if err == nil {
+			return file
+		}
+
+		log.Println("File not found, trying in working directory")
+
+		file, err = os.ReadFile(rootPath + "/database.yml")
+
+		if err == nil {
+			return file
+		}
+
+		log.Println("File not found, trying embeded file")
+	}
+
+	file, err := resources.ReadFile("config/database.yml")
+
+	log.Println("Project root:", rootPath)
+
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	return file
 }
