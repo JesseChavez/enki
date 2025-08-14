@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/JesseChavez/enki/commands"
 	"github.com/JesseChavez/enki/database"
 	"github.com/JesseChavez/enki/logger"
 	"github.com/JesseChavez/enki/session"
@@ -163,7 +164,13 @@ func (ek *Enki) InitJobApplication() {
 	intializeDatabase(ek)
 }
 
-func (ek *Enki) InitDbMigration() {
+func (ek *Enki) ExecuteCommand(command []string) {
+	runner := commands.Runner{
+		Env: ek.Env,
+		Command: command,
+	}
+
+	runner.Perform()
 }
 
 func (enki *Enki) fetchEnvironment() string {
