@@ -146,6 +146,9 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 	// init support (renderer and helpers)
 	ek.ViewSupport = view.New(ek.Env, api, csr, contextPath, rootPath, Resources)
 
+	// Enable static assets server
+	ek.staticAssets(contextPath, ek.Routes)
+
 	// add shutdown server endpoint
 	ek.Routes.Get("/shutdown", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Sutdown request")

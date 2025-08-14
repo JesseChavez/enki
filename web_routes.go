@@ -46,8 +46,7 @@ func (ek *Enki) appRoutes() (*Mux, *Mux) {
 	// adding server status check
 	trunkMux.Use(middleware.Heartbeat("/ping"))
 
-	// NOTE: chi does not like mount static file server in sub route
-	ek.staticAssets(contextPath, trunkMux)
+	// ek.staticAssets(contextPath, trunkMux)
 
 	if contextPath == "/" {
 		return trunkMux, trunkMux
@@ -71,6 +70,7 @@ func (ek *Enki) appRoutes() (*Mux, *Mux) {
 }
 
 func (ek *Enki) staticAssets(contextPath string, mux *Mux) {
+	// NOTE: chi does not like mount static file server in sub route
 	prefixPath := ""
 
 	if contextPath != "/" {
