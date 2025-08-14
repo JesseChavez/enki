@@ -84,7 +84,8 @@ func ConfigFile(env string, rootPath string, resources embed.FS) []byte {
 		file, err := os.ReadFile("/var/local/config/database.yml")
 
 		if err == nil {
-			return file
+			expandedFile := os.ExpandEnv(string(file))
+			return []byte(expandedFile)
 		}
 
 		log.Println("File not found, trying in working directory")
@@ -92,7 +93,8 @@ func ConfigFile(env string, rootPath string, resources embed.FS) []byte {
 		file, err = os.ReadFile(rootPath + "/database.yml")
 
 		if err == nil {
-			return file
+			expandedFile := os.ExpandEnv(string(file))
+			return []byte(expandedFile)
 		}
 
 		log.Println("File not found, trying embeded file")
@@ -106,5 +108,6 @@ func ConfigFile(env string, rootPath string, resources embed.FS) []byte {
 		log.Fatal(err.Error())
 	}
 
-	return file
+	expandedFile := os.ExpandEnv(string(file))
+	return []byte(expandedFile)
 }
