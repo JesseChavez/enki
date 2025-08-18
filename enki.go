@@ -53,7 +53,7 @@ type IViewSupport interface {
 	RenderXML(w http.ResponseWriter, status int, view *ActionView)
 }
 
-type ISessionStore interface {
+type ISessionManager interface {
 	GetSession(*http.Request) *bouncer.Session
 }
 
@@ -65,8 +65,8 @@ type Enki struct {
 	DBConfig     database.Config
 	DB           Repository
 	Logger       ILogger
-	SessionStore ISessionStore
-	ViewSupport  IViewSupport
+	SessionManager ISessionManager
+	ViewSupport    IViewSupport
 }
 
 
@@ -134,7 +134,7 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 	ek.Logger = logger.New()
 
 	// initialize session manager
-	ek.SessionStore = bouncer.New(sessionKey, secretEncrKey, sessionMaxAge, false)
+	ek.SessionManager = bouncer.New(sessionKey, secretEncrKey, sessionMaxAge, false)
 
 	// init db
 	intializeDatabase(ek)
