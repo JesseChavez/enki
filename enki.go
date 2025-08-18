@@ -21,7 +21,6 @@ import (
 	"github.com/go-rel/mssql"
 	"github.com/go-rel/postgres"
 	"github.com/go-rel/rel"
-	"github.com/gorilla/securecookie"
 
 	_ "github.com/lib/pq"
 	_ "github.com/microsoft/go-mssqldb"
@@ -85,8 +84,7 @@ var WebPort = "3000"
 
 var TimeZone = "UTC"
 
-var SecretAuthKey = string(securecookie.GenerateRandomKey(64))
-var SecretEncrKey = string(securecookie.GenerateRandomKey(32))
+var SecretEncrKey = "secret-key-base"
 
 var API = false
 
@@ -100,7 +98,6 @@ var sessionKey string
 var sessionMaxAge int
 var rootPath string
 
-var secretAuthKey string
 var secretEncrKey string
 var api bool
 var csr bool
@@ -121,7 +118,6 @@ func New(name string) Enki {
 
 	rootPath = workingDir()
 
-	secretAuthKey = SecretAuthKey
 	secretEncrKey = SecretEncrKey
 	api = API
 	csr = CSR
@@ -137,7 +133,7 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 	// init logger
 	ek.Logger = logger.New()
 
-	// initialize session store
+	// initialize session manager
 	ek.SessionStore = bouncer.New(sessionKey, secretEncrKey, sessionMaxAge, false)
 
 	// init db
@@ -191,9 +187,6 @@ func (enki *Enki) fetchEnvironment() string {
 	}
 
 	return env
-}
-
-func intializeSessionStore(ek *Enki) {
 }
 
 func intializeDatabase(ek *Enki) {
