@@ -14,7 +14,7 @@ import (
 	"github.com/JesseChavez/enki/commands"
 	"github.com/JesseChavez/enki/database"
 	"github.com/JesseChavez/enki/logger"
-	"github.com/JesseChavez/enki/session"
+	"github.com/JesseChavez/enki/bouncer"
 	"github.com/JesseChavez/enki/view"
 	"github.com/JesseChavez/spt"
 	"github.com/go-chi/chi/v5"
@@ -55,7 +55,7 @@ type IViewSupport interface {
 }
 
 type ISessionStore interface {
-	GetSession(*http.Request) *session.Session
+	GetSession(*http.Request) *bouncer.Session
 }
 
 type Enki struct {
@@ -138,7 +138,7 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 	ek.Logger = logger.New()
 
 	// initialize session store
-	ek.SessionStore = session.New(sessionKey, sessionMaxAge, secretAuthKey, secretEncrKey)
+	ek.SessionStore = bouncer.New(sessionKey, secretEncrKey, sessionMaxAge, false)
 
 	// init db
 	intializeDatabase(ek)
