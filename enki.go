@@ -84,7 +84,7 @@ var WebPort = "3000"
 
 var TimeZone = "UTC"
 
-var SecretEncrKey = "secret-key-base"
+var SecretKeyBase = "secret-key-base"
 
 var API = false
 
@@ -98,7 +98,7 @@ var sessionKey string
 var sessionMaxAge int
 var rootPath string
 
-var secretEncrKey string
+var secretKeyBase string
 var api bool
 var csr bool
 
@@ -118,7 +118,7 @@ func New(name string) Enki {
 
 	rootPath = workingDir()
 
-	secretEncrKey = SecretEncrKey
+	secretKeyBase = SecretKeyBase
 	api = API
 	csr = CSR
 
@@ -134,7 +134,7 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 	ek.Logger = logger.New()
 
 	// initialize session manager
-	ek.SessionManager = bouncer.New(sessionKey, secretEncrKey, sessionMaxAge, false)
+	ek.SessionManager = bouncer.New(sessionKey, secretKeyBase, sessionMaxAge, false)
 
 	// init db
 	intializeDatabase(ek)
