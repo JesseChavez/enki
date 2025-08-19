@@ -40,7 +40,7 @@ func (cs *CookieStore) Get(r *http.Request, name string) (*Session, error) {
 		return  &session, err
 	}
 
-	err = cs.Unpack(cookie.Value, &session.Values)
+	err = cs.Decode(cookie.Value, &session.Values)
 
 	return  &session, err
 }
@@ -53,7 +53,7 @@ func (cs *CookieStore) Save(r *http.Request, w http.ResponseWriter, s *Session) 
 
 	cookie := cs.NewCookie(s.name, s.Options)
 
-	cookie.Value, err = cs.Pack(s.Values)
+	cookie.Value, err = cs.Encode(s.Values)
 
 	http.SetCookie(w, cookie)
 	return err
@@ -92,7 +92,7 @@ func (cs *CookieStore) NewCookie(name string, options *Options) *http.Cookie {
 	return &cookie
 }
 
-func (cs *CookieStore) Unpack(escapedData string, decodedData any) error {
+func (cs *CookieStore) Decode(escapedData string, decodedData any) error {
 	var err error
 
 	encodedData, err := url.QueryUnescape(escapedData)
@@ -102,7 +102,7 @@ func (cs *CookieStore) Unpack(escapedData string, decodedData any) error {
 	return err
 }
 
-func (cs *CookieStore) Pack(decodedData any) (string, error) {
+func (cs *CookieStore) Encode(decodedData any) (string, error) {
 	var err error
 
 	encodedData, err := json.Marshal(decodedData)
