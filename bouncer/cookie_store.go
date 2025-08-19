@@ -1,7 +1,6 @@
 package bouncer
 
 import (
-	"encoding/json"
 	"net/http"
 	"net/url"
 )
@@ -9,16 +8,16 @@ import (
 
 type CookieStore struct {
 	BaseOptions *Options
-	secret string
-	salt   string
+	Transcoder  *Transcoder
 }
 
 
 func NewCookieStore(secret string, salt string) *CookieStore {
-	store := CookieStore{
-		secret: secret,
-		salt: salt,
-	}
+	store := CookieStore{}
+
+	transcoder := new(Transcoder).Init(secret, salt)
+
+	store.Transcoder = transcoder
 
 	return &store
 }
@@ -92,26 +91,26 @@ func (cs *CookieStore) NewCookie(name string, options *Options) *http.Cookie {
 	return &cookie
 }
 
-func (cs *CookieStore) Decode(escapedData string, decodedData any) error {
+func (cs *CookieStore) Decode(escapedValue string, decodedValue any) error {
 	var err error
 
-	encodedData, err := url.QueryUnescape(escapedData)
+	encodedValue, err := url.QueryUnescape(escapedValue)
 
-	err = json.Unmarshal([]byte(encodedData), decodedData)
+	err = cs.Transcoder.Decode(encodedValue, decodedValue)
 
 	return err
 }
 
-func (cs *CookieStore) Encode(decodedData any) (string, error) {
+func (cs *CookieStore) Encode(decodedValue any) (string, error) {
 	var err error
 
-	encodedData, err := json.Marshal(decodedData)
+	encodedValue, err := cs.Transcoder.Encode(decodedValue)
 
 	if err != nil {
 		return "", err
 	}
 
-	escapedData := url.QueryEscape(string(encodedData))
+	escapedValue := url.QueryEscape(encodedValue)
 
-	return escapedData, err
+	return escapedValue, err
 }
