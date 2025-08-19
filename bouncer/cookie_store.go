@@ -9,11 +9,16 @@ import (
 
 type CookieStore struct {
 	BaseOptions *Options
+	secret string
+	salt   string
 }
 
 
-func NewCookieStore() *CookieStore {
-	store := CookieStore{}
+func NewCookieStore(secret string, salt string) *CookieStore {
+	store := CookieStore{
+		secret: secret,
+		salt: salt,
+	}
 
 	return &store
 }

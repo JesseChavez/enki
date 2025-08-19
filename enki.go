@@ -86,6 +86,9 @@ var TimeZone = "UTC"
 
 var SecretKeyBase = "secret-key-base"
 
+
+var AuthenticatedEncryptedCookieSalt = "authenticated encrypted cookie"
+
 var API = false
 
 var CSR = false
@@ -99,6 +102,7 @@ var sessionMaxAge int
 var rootPath string
 
 var secretKeyBase string
+var authenticatedEncryptedCookieSalt string
 var api bool
 var csr bool
 
@@ -119,6 +123,8 @@ func New(name string) Enki {
 	rootPath = workingDir()
 
 	secretKeyBase = SecretKeyBase
+	authenticatedEncryptedCookieSalt = AuthenticatedEncryptedCookieSalt
+
 	api = API
 	csr = CSR
 
@@ -134,7 +140,9 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 	ek.Logger = logger.New()
 
 	// initialize session manager
-	ek.SessionManager = bouncer.New(sessionKey, secretKeyBase, sessionMaxAge, false)
+	ek.SessionManager = bouncer.New(
+		sessionKey, secretKeyBase, authenticatedEncryptedCookieSalt, sessionMaxAge, false,
+	)
 
 	// init db
 	intializeDatabase(ek)

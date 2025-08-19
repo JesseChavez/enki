@@ -26,7 +26,7 @@ type Manager struct {
 	Store Store
 }
 
-func New(name string, secret string, maxAge int, secure bool) *Manager {
+func New(name string, secret string, salt string, maxAge int, secure bool) *Manager {
 	manager := Manager{Name: name}
 
 	// change to different store here.
@@ -37,6 +37,7 @@ func New(name string, secret string, maxAge int, secure bool) *Manager {
 		Path:     "/",
 		MaxAge:   60 * maxAge,
 		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
 		Secure: secure,
 	}
 
