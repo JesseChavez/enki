@@ -6,6 +6,8 @@ import (
 	"errors"
 	"log"
 	"strings"
+
+	"github.com/JesseChavez/enki/cypher"
 )
 
 type Transcoder struct {
@@ -17,6 +19,14 @@ type Transcoder struct {
 func (tc *Transcoder) Init(secret string, salt string) *Transcoder {
 	tc.secret = secret
 	tc.salt   = salt
+
+	key, err := cypher.KeyGenerator(secret, salt)
+
+	if err != nil {
+		panic(err)
+	}
+
+	tc.derivedSecret = key
 
 	return  tc
 }
@@ -31,7 +41,18 @@ func (tc *Transcoder) Decode(encodedValue string, decodedValue any) error {
 		return err
 	}
 
-	err = json.Unmarshal(unpackedValue[0], decodedValue)
+	encMsg := unpackedValue[0]
+	iv     := unpackedValue[1]
+	tag    := unpackedValue[2]
+
+
+	msg, err := cypher.DecryptMessage(tc.derivedSecret, encMsg, iv, tag)
+
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(msg, decodedValue)
 
 	return err
 }
@@ -39,14 +60,17 @@ func (tc *Transcoder) Decode(encodedValue string, decodedValue any) error {
 func (tc *Transcoder) Encode(decodedValue any) (string, error) {
 	var err error
 
+
 	encodedValue, err := json.Marshal(decodedValue)
 
 	if err != nil {
 		return "", err
 	}
 
+	msg, iv, tag, err := cypher.EncryptMessage(tc.derivedSecret, encodedValue)
+
 	// Format: [Data, IV, AuthTag]
-	parts := [][]byte{encodedValue, []byte{}, []byte{} }
+	parts := [][]byte{msg, iv, tag}
 
 	packedValue := tc.Pack(parts)
 
