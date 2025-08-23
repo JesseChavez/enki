@@ -69,6 +69,10 @@ func (tc *Transcoder) Encode(decodedValue any) (string, error) {
 
 	msg, iv, tag, err := cypher.EncryptMessage(tc.derivedSecret, encodedValue)
 
+	if err != nil {
+		return "", err
+	}
+
 	// Format: [Data, IV, AuthTag]
 	parts := [][]byte{msg, iv, tag}
 
