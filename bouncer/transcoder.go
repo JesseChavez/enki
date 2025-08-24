@@ -52,7 +52,13 @@ func (tc *Transcoder) Decode(encodedValue string, decodedValue any) error {
 		return err
 	}
 
-	err = json.Unmarshal(msg, decodedValue)
+	value, err := UnwrapSession(msg)
+
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(value, decodedValue)
 
 	return err
 }
@@ -60,14 +66,19 @@ func (tc *Transcoder) Decode(encodedValue string, decodedValue any) error {
 func (tc *Transcoder) Encode(decodedValue any) (string, error) {
 	var err error
 
-
 	encodedValue, err := json.Marshal(decodedValue)
 
 	if err != nil {
 		return "", err
 	}
 
-	msg, iv, tag, err := cypher.EncryptMessage(tc.derivedSecret, encodedValue)
+	rawMsg, err := WrapSession(encodedValue)
+
+	if err != nil {
+		return "", err
+	}
+
+	msg, iv, tag, err := cypher.EncryptMessage(tc.derivedSecret, rawMsg)
 
 	if err != nil {
 		return "", err
