@@ -30,9 +30,9 @@ func New(name string, secret string, salt string, maxAge int, secure bool) *Mana
 	manager := Manager{Name: name}
 
 	// change to different store here.
-	store := NewCookieStore(secret, salt)
+	store := NewCookieStore(secret, salt, maxAge)
 
-	// MaxAge unit is seconds
+	// Cookie MaxAge unit is seconds
 	store.BaseOptions = &Options{
 		Path:     "/",
 		MaxAge:   60 * maxAge,

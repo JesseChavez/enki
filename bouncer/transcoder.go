@@ -13,12 +13,14 @@ import (
 type Transcoder struct {
 	secret        string
 	salt          string
+	maxAge        int
 	derivedSecret []byte
 }
 
-func (tc *Transcoder) Init(secret string, salt string) *Transcoder {
+func (tc *Transcoder) Init(secret string, salt string, maxAge int) *Transcoder {
 	tc.secret = secret
 	tc.salt   = salt
+	tc.maxAge = maxAge
 
 	key, err := cypher.KeyGenerator(secret, salt)
 
@@ -72,7 +74,7 @@ func (tc *Transcoder) Encode(decodedValue any) (string, error) {
 		return "", err
 	}
 
-	rawMsg, err := WrapSession(encodedValue)
+	rawMsg, err := WrapSession(encodedValue, tc.maxAge)
 
 	if err != nil {
 		return "", err

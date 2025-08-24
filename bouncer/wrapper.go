@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"time"
 )
 
 type Payload struct {
@@ -17,12 +18,15 @@ type CookieSession struct {
 }
 
 
-func WrapSession (encodedValue []byte) ([]byte, error)  {
+func WrapSession (encodedValue []byte, maxAge int) ([]byte, error)  {
 	message := base64.StdEncoding.EncodeToString(encodedValue)
+
+	expiry := ExpireTime(maxAge)
 
 	session := CookieSession{
 		Payload: Payload{
 			Message: message,
+			Expiry: expiry,
 		},
 	}
 
@@ -49,4 +53,11 @@ func UnwrapSession (msg []byte) ([]byte, error) {
 	decodedMessage, err := base64.StdEncoding.DecodeString(message)
 
 	return decodedMessage, err
+}
+
+func ExpireTime(minutes int) string {
+	// time is formatted in iso8601
+	now := time.Now().Add(time.Minute * time.Duration(minutes))
+
+	return now.UTC().Format("2006-01-02T15:04:05Z07:00")
 }

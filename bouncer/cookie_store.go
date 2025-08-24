@@ -12,10 +12,10 @@ type CookieStore struct {
 }
 
 
-func NewCookieStore(secret string, salt string) *CookieStore {
+func NewCookieStore(secret string, salt string, maxAge int) *CookieStore {
 	store := CookieStore{}
 
-	transcoder := new(Transcoder).Init(secret, salt)
+	transcoder := new(Transcoder).Init(secret, salt, maxAge)
 
 	store.Transcoder = transcoder
 
