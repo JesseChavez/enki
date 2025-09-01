@@ -49,6 +49,7 @@ type IViewSupport interface {
 	AssetPath(string) string
 	URLParam(*http.Request, string) string
 	Render(w http.ResponseWriter, status int, view *ActionView)
+	RenderJSON(w http.ResponseWriter, status int, data any)
 	RenderHTML(w http.ResponseWriter, status int, view *ActionView)
 	RenderXML(w http.ResponseWriter, status int, view *ActionView)
 }

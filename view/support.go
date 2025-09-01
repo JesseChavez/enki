@@ -65,6 +65,10 @@ func (supp *ViewSupport) Render(w http.ResponseWriter, status int, view *ActionV
 	}
 }
 
+func (supp *ViewSupport) RenderJSON(w http.ResponseWriter, status int, data any) {
+	supp.Renderer.RenderJSON(w, status, data)
+}
+
 func (supp *ViewSupport) RenderHTML(w http.ResponseWriter, status int, view *ActionView) {
 	template := view.Template
 

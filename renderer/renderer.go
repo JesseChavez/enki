@@ -75,6 +75,24 @@ func (ren *Renderer) Render(w http.ResponseWriter, status int, meta map[string]s
 	// log.Println("rendering ...")
 }
 
+ func (ren *Renderer)RenderJSON(w http.ResponseWriter, status int, data any) {
+	buf := &bytes.Buffer{}
+	enc := json.NewEncoder(buf)
+	enc.SetEscapeHTML(true)
+
+	err := enc.Encode(data)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(status)
+
+	w.Write(buf.Bytes())
+}
+
 func (ren *Renderer) RenderHTML(w http.ResponseWriter, status int, tmpl string, data any) {
 	parsedTmpl, err := ren.fetchTemplate(tmpl)
 
