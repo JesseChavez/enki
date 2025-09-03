@@ -228,6 +228,9 @@ func intializeDatabase(ek *Enki) {
 	// Add to shutdown list.
 	Shutdown = append(Shutdown, adapter.Close)
 
+	// Set orm now to be standard GO now (consider fractional time)
+	rel.Now = time.Now
+
 	ek.DB = rel.New(adapter)
 	ek.DB.Instrumentation(func(ctx context.Context, op string, message string, args ...any) func(err error) {
 		// no op for rel functions.
