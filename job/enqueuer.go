@@ -74,10 +74,10 @@ func (enq *Enqueuer) PerformNow(jobName string, args Args) (string, error) {
 	id := uuid.New().String()
 	// Prepare arguments for the method call
 	// args := []reflect.Value{reflect.ValueOf("my args?")}
-	pArgs := []reflect.Value{}
+	mArgs := []reflect.Value{reflect.ValueOf(args)}
 
 	// Call the method
-	wrappedFailure := method.Call(pArgs)
+	wrappedFailure := method.Call(mArgs)
 
 	failure := wrappedFailure[0].Interface().([]error)
 

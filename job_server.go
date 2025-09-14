@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"strings"
 
 	"github.com/JesseChavez/enki/job"
 )
@@ -45,7 +46,25 @@ func (ek *Enki) StartAndWork() {
 
 	log.Println("Work args:", initArgs)
 
+	if len(initArgs) < 1 {
+		log.Println("Job argument is required")
+		return
+	}
+
 	jobString := initArgs[0]
 
-	ek.JobSupport.PerformNow(jobString, Args{"qwerty": "123"})
+	args := Args{}
+
+	jobArgs :=initArgs[1:]
+
+	for _, jobArg := range jobArgs {
+		delimiter := "="
+		pair := strings.Split(jobArg, delimiter)
+		if len(pair) == 2 {
+			args[pair[0]] = pair[1]
+		}
+
+	}
+
+	ek.JobSupport.PerformNow(jobString, args)
 }
