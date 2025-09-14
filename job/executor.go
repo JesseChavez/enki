@@ -127,6 +127,13 @@ func (ex *JobExecutor) executeJob(ctx context.Context, job QueuedJob) bool {
 		return true
 	}
 
+	err = ex.DB.Delete(ctx, &job)
+
+	if err != nil {
+		fmt.Println("Error deleting job:", err)
+		return true
+	}
+
 	return false
 }
 
