@@ -38,6 +38,7 @@ type QueuedJob struct {
 	Priority          int
 	Attempts          int
 	RunAt             time.Time
+	Args              string
 	State             string
 	FailedAt          *time.Time
 	LastError         string

@@ -2,6 +2,7 @@ package job
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"log"
 	"reflect"
@@ -101,6 +102,14 @@ func (enq *Enqueuer) Enqueue(task *Task, args Args) (string, error) {
 		return "", errors.New("Undefined Job")
 	}
 
+	sArgs, err := json.Marshal(args)
+
+	if err != nil {
+		log.Println("Failure serializing Args:", args)
+		return "", err
+	}
+
+
 	job := reflect.New(jobModel)
 	
 	log.Println("xxx:", job)
@@ -118,6 +127,7 @@ func (enq *Enqueuer) Enqueue(task *Task, args Args) (string, error) {
 	record.Priority = values.Priority
 	record.Attempts = 0
 	record.State    = "scheduled"
+	record.Args     = string(sArgs)
 	record.RunAt    = values.runAt
 
 	ctx := context.Background()
