@@ -24,6 +24,7 @@ type Enqueuer struct {
 type JobDefaults struct {
 	Queue    string
 	Priority int
+	runAt    time.Time
 }
 
 func New(env string, db rel.Repository) *Enqueuer {
@@ -86,8 +87,10 @@ func (enq *Enqueuer) PerformNow(jobName string, args Args) (string, error) {
 	return id, nil
 }
 
-func (enq *Enqueuer) PerformLater(jobName string, args Args) (string, error) {
+func (enq *Enqueuer) Enqueue(task *Task, args Args) (string, error) {
 	var err error
+
+	jobName := task.name
 
 	log.Println("registered queues:", enq.JobList)
 
@@ -102,13 +105,11 @@ func (enq *Enqueuer) PerformLater(jobName string, args Args) (string, error) {
 	
 	log.Println("xxx:", job)
 
-	values := enq.configuredValues(job)
+	values := enq.configuredValues(task, job)
 
 	id := uuid.New().String()
 
 	record := QueuedJob{}
-
-	rightNow := time.Now()
 
 	record.Queue    = values.Queue
 	record.Handler  = "JobExecutor"
@@ -117,7 +118,7 @@ func (enq *Enqueuer) PerformLater(jobName string, args Args) (string, error) {
 	record.Priority = values.Priority
 	record.Attempts = 0
 	record.State    = "scheduled"
-	record.RunAt    = rightNow
+	record.RunAt    = values.runAt
 
 	ctx := context.Background()
 
@@ -126,10 +127,27 @@ func (enq *Enqueuer) PerformLater(jobName string, args Args) (string, error) {
 	return id , err
 }
 
-func (enq *Enqueuer) configuredValues(job reflect.Value) *JobDefaults {
+func (enq *Enqueuer) configuredValues(task *Task, job reflect.Value) *JobDefaults {
+	queue := "default"
+	priority := 1
+	runAt := time.Now()
+
+	if task.queue != nil {
+		queue = *task.queue
+	}
+
+	if task.priority != nil {
+		priority = *task.priority
+	}
+
+	if task.runAt != nil {
+		runAt = *task.runAt
+	}
+
 	values := JobDefaults{
-		Queue: "default",
-		Priority: 1,
+		Queue: queue,
+		Priority: priority,
+		runAt: runAt,
 	}
 
 	method := job.MethodByName("Init")

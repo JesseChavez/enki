@@ -65,6 +65,8 @@ type IJobSupport interface {
 	Register(queue string, job job.ActiveJob)
 	PerformNow(job string, args Args) (string, error)
 	PerformLater(job string, args Args) (string, error)
+	Wait(duration time.Duration) *job.Task
+	WaitUntil(runAt time.Time) *job.Task
 }
 
 type Enki struct {
