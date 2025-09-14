@@ -135,6 +135,9 @@ func New(name string) Enki {
 	secretKeyBase = SecretKeyBase
 	authenticatedEncryptedCookieSalt = AuthenticatedEncryptedCookieSalt
 
+	// Set local time zone to UTC
+	time.Local = time.UTC
+
 	api = API
 	csr = CSR
 
