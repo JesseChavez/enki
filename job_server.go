@@ -12,6 +12,8 @@ import (
 func (ek *Enki) StartAndProcess() {
 	server := &job.JobExecutor{
 		Env:  ek.Env,
+		DB: ek.DB,
+		JobSupport: ek.JobSupport,
 	}
 
 	log.Println("Job Application is starting...")

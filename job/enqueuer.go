@@ -85,7 +85,7 @@ func (enq *Enqueuer) PerformNow(jobName string, args Args) (string, error) {
 		log.Println("Error:", failure)
 	}
 
-	return id, nil
+	return id, failure[0]
 }
 
 func (enq *Enqueuer) Enqueue(task *Task, args Args) (string, error) {

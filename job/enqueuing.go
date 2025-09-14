@@ -2,6 +2,14 @@ package job
 
 import "time"
 
+type IJobSupport interface {
+	Register(queue string, job ActiveJob)
+	PerformNow(job string, args Args) (string, error)
+	PerformLater(job string, args Args) (string, error)
+	Wait(duration time.Duration) *Task
+	WaitUntil(runAt time.Time) *Task
+}
+
 type Task struct {
 	enqueuer *Enqueuer
 	name     string

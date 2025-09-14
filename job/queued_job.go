@@ -37,12 +37,14 @@ type QueuedJob struct {
 	JobId             string
 	Priority          int
 	Attempts          int
+	State             string
 	RunAt             time.Time
 	Args              string
-	State             string
-	FailedAt          *time.Time
 	LastError         string
 	LastBacktrace     string
+	FailedAt          *time.Time
+	LockedBy          string
+	LockedAt          *time.Time
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 }
