@@ -11,10 +11,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/JesseChavez/enki/bouncer"
 	"github.com/JesseChavez/enki/commands"
 	"github.com/JesseChavez/enki/database"
+	"github.com/JesseChavez/enki/job"
 	"github.com/JesseChavez/enki/logger"
-	"github.com/JesseChavez/enki/bouncer"
 	"github.com/JesseChavez/enki/view"
 	"github.com/JesseChavez/spt"
 	"github.com/go-chi/chi/v5"
@@ -58,16 +59,24 @@ type ISessionManager interface {
 	GetSession(*http.Request) *bouncer.Session
 }
 
+type Args = job.Args
+
+type IJobSupport interface {
+	Register(queue string, job job.ActiveJob)
+	PerformNow(job string, args Args) (string, error)
+	PerformLater(job string, args Args) (string, error)
+}
+
 type Enki struct {
 	AppName      string
 	Env          string
 	Routes       *Mux
-	Queues       *Queues
 	DBConfig     database.Config
 	DB           Repository
 	Logger       ILogger
 	SessionManager ISessionManager
 	ViewSupport    IViewSupport
+	JobSupport     IJobSupport
 }
 
 
@@ -151,6 +160,9 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 	// init support (renderer and helpers)
 	ek.ViewSupport = view.New(ek.Env, api, csr, contextPath, rootPath, Resources)
 
+	log.Println("jobs support")
+	ek.JobSupport = job.New(ek.Env, ek.DB)
+
 	// Enable static assets server
 	ek.staticAssets(contextPath, ek.Routes)
 
@@ -170,6 +182,9 @@ func (ek *Enki) InitJobApplication() {
 
 	// init db
 	intializeDatabase(ek)
+
+	log.Println("jobs support")
+	ek.JobSupport = job.New(ek.Env, ek.DB)
 }
 
 func (ek *Enki) ExecuteCommand(command []string) {
