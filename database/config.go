@@ -23,6 +23,7 @@ type Config struct {
 	Database string `yaml:"database,omitempty"`
 	Username string `yaml:"username,omitempty"`
 	Password string `yaml:"password,omitempty"`
+	Sslmode  string `yaml:"sslmode,omitempty"`
 }
 
 func NewConfig(file []byte, env string) EnvConfig {
