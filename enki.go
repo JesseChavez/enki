@@ -150,7 +150,7 @@ func (ek *Enki) Version() string {
 
 func (ek *Enki) InitWebApplication(contextMux *Mux) {
 	// init logger
-	ek.Logger = logger.New(logLevel)
+	ek.Logger = logger.New(ek.AppName, logLevel)
 
 	// initialize session manager
 	ek.SessionManager = bouncer.New(
@@ -181,7 +181,7 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 
 func (ek *Enki) InitJobApplication() {
 	// init logger
-	ek.Logger = logger.New(logLevel)
+	ek.Logger = logger.New(ek.AppName, logLevel)
 
 	// init db
 	intializeDatabase(ek)
