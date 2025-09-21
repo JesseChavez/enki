@@ -90,6 +90,8 @@ var WebPort = "3000"
 
 var TimeZone = "UTC"
 
+var LogLevel = "info"
+
 var SecretKeyBase = "secret-key-base"
 
 
@@ -102,6 +104,7 @@ var CSR = false
 // private variables
 var webPort string
 var timeZone string
+var logLevel string
 var contextPath string
 var sessionKey string
 var sessionMaxAge int
@@ -122,6 +125,7 @@ func New(name string) Enki {
 
 	webPort = WebPort
 	timeZone = TimeZone
+	logLevel = LogLevel
 	contextPath = ContextPath
 	sessionKey = SessionKey
 	sessionMaxAge = SessionMaxAge
@@ -146,7 +150,7 @@ func (ek *Enki) Version() string {
 
 func (ek *Enki) InitWebApplication(contextMux *Mux) {
 	// init logger
-	ek.Logger = logger.New()
+	ek.Logger = logger.New(logLevel)
 
 	// initialize session manager
 	ek.SessionManager = bouncer.New(
@@ -177,7 +181,7 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 
 func (ek *Enki) InitJobApplication() {
 	// init logger
-	ek.Logger = logger.New()
+	ek.Logger = logger.New(logLevel)
 
 	// init db
 	intializeDatabase(ek)
@@ -266,7 +270,7 @@ func intializeDatabase(ek *Enki) {
 			if err != nil {
 				ek.Logger.Error(message, "stat", stats, "err", err)
 			} else {
-				ek.Logger.Info(message, "stat", stats)
+				ek.Logger.Debug(message, "stat", stats)
 			}
 		}
 	})

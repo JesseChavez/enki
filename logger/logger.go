@@ -10,10 +10,26 @@ type Logger struct {
 	log *slog.Logger
 }
 
-func New() *Logger {
+func New(appLogLevel string) *Logger {
 	nlog := Logger{}
     // sl := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-    sl := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
+	logLevel := slog.LevelDebug
+
+	switch appLogLevel {
+	case "info":
+		logLevel = slog.LevelInfo
+	case "debug":
+		logLevel = slog.LevelDebug
+	}
+
+	log.Println("log level:", logLevel)
+
+	options := &slog.HandlerOptions{
+		Level: logLevel,
+	}
+
+    sl := slog.New(slog.NewTextHandler(os.Stdout, options))
 
 	nlog.log = sl
 
