@@ -46,21 +46,22 @@ func NewConfig(file []byte, env string) EnvConfig {
 	return config
 }
 
-func (conf *Config) GetUrl() string {
-	var url string
+func (conf *Config) GetUrl() (string, string) {
+	var realUrl string
+	var fakeUrl string
 
 	adapter := conf.Adapter
 
 	switch adapter {
 	case "sqlserver":
-		url = UrlForMssql(*conf)
+		realUrl, fakeUrl = UrlForMssql(*conf)
 	case "postgres":
-		url = UrlForPostgres(*conf)
+		realUrl, fakeUrl = UrlForPostgres(*conf)
 	default:
 		log.Fatalf("Invalid database adapter '%v'", adapter)
 	}
 
-	return url
+	return realUrl, fakeUrl
 }
 
 func (conf *EnvConfig) GetEnv(env string) Config {

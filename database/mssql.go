@@ -4,11 +4,13 @@ import (
 	"fmt"
 )
 
-func UrlForMssql(conf Config) string {
+func UrlForMssql(conf Config) (string, string) {
 	// "sqlserver://username:password@localhost:1433?database=my_db"
 	format := "%s://%s:%s@%s:%s?database=%s"
 
-	url := fmt.Sprintf(format, conf.Adapter, conf.Username, conf.Password, conf.Host, conf.Port, conf.Database)
+	realUrl := fmt.Sprintf(format, conf.Adapter, conf.Username, conf.Password, conf.Host, conf.Port, conf.Database)
 
-	return url
+	fakeUrl := fmt.Sprintf(format, conf.Adapter, "[∗∗∗∗]", "[∗∗∗∗]", conf.Host, conf.Port, conf.Database)
+
+	return realUrl, fakeUrl
 }

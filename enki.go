@@ -217,18 +217,23 @@ func intializeDatabase(ek *Enki) {
 
 	adapterName := config.Current.Adapter
 
-	url := config.Current.GetUrl()
+	realUrl, fakeUrl := config.Current.GetUrl()
 
-	log.Println("DB connection url:", url)
+	if ek.Env == "development" {
+		log.Println("DB connection url:", realUrl)
+	} else {
+		log.Println("DB connection url:", fakeUrl)
+	}
+
 
 	var adapter rel.Adapter
 	var err error
 
 	switch adapterName {
 	case "sqlserver":
-		adapter, err = mssql.Open(url)
+		adapter, err = mssql.Open(realUrl)
 	case "postgres":
-		adapter, err = postgres.Open(url)
+		adapter, err = postgres.Open(realUrl)
 	case "sqlite3":
 	// adapter, err = sqlite3.Open(url)
 	default:
