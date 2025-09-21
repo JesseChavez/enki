@@ -80,25 +80,46 @@ func (conf *EnvConfig) GetEnv(env string) Config {
 	return params
 }
 
-func ConfigFile(env string, rootPath string, resources embed.FS) []byte {
+func ConfigFile(appName string, env string, rootPath string, resources embed.FS) []byte {
 	if env == "production" {
-		file, err := os.ReadFile("/var/local/config/database.yml")
+		fileName := "database_" + appName + ".yml"
+
+		systemFile := "/var/local/config/" + fileName
+
+		file, err := os.ReadFile(systemFile)
 
 		if err == nil {
+			log.Println("loading file:", systemFile)
+			expandedFile := os.ExpandEnv(string(file))
+			return []byte(expandedFile)
+		}
+		
+		log.Println("DB system file not found:", systemFile)
+
+		systemWorkingDirFile := rootPath + "/" + fileName
+
+		file, err = os.ReadFile(systemWorkingDirFile)
+
+		if err == nil {
+			log.Println("loading file:", systemFile)
 			expandedFile := os.ExpandEnv(string(file))
 			return []byte(expandedFile)
 		}
 
-		log.Println("File not found, trying in working directory")
+		log.Println("DB system file not found:", systemWorkingDirFile)
 
-		file, err = os.ReadFile(rootPath + "/database.yml")
+		globalFile := rootPath + "/database.yml"
+
+		file, err = os.ReadFile(globalFile)
 
 		if err == nil {
+			log.Println("loading file:", globalFile)
 			expandedFile := os.ExpandEnv(string(file))
 			return []byte(expandedFile)
 		}
 
-		log.Println("File not found, trying embeded file")
+		log.Println("DB global file not found:", globalFile)
+		log.Println("Trying embeded file")
 	}
 
 	file, err := resources.ReadFile("config/database.yml")

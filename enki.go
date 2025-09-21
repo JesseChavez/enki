@@ -270,7 +270,7 @@ func intializeDatabase(ek *Enki) {
 }
 
 func (ek *Enki) NewDBConfig() database.EnvConfig {
-	blob := database.ConfigFile(ek.Env, rootPath, Resources)
+	blob := database.ConfigFile(ek.AppName, ek.Env, rootPath, Resources)
 
 	config := database.NewConfig(blob, ek.Env)
 
@@ -279,6 +279,7 @@ func (ek *Enki) NewDBConfig() database.EnvConfig {
 
 func workingDir() string {
 	exec, err := os.Executable()
+
 	if err != nil {
 		log.Fatal(err)
 	}
