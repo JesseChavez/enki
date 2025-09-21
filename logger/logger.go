@@ -4,6 +4,8 @@ import (
 	"log"
 	"log/slog"
 	"os"
+
+	"github.com/JesseChavez/spt"
 )
 
 type Logger struct {
@@ -29,11 +31,37 @@ func New(appLogLevel string) *Logger {
 		Level: logLevel,
 	}
 
-    sl := slog.New(slog.NewTextHandler(os.Stdout, options))
+	output := OutputStream()
+
+	handler := slog.NewTextHandler(output, options)
+
+	sl := slog.New(handler)
 
 	nlog.log = sl
 
     return &nlog
+}
+
+func OutputStream() *os.File {
+	fileLogging := spt.FetchEnv("LOG_TO_FILE", "")
+
+	if fileLogging == "" {
+		return os.Stdout
+	}
+
+	filePath := "/home/jessec/bryk/head/go_fm_data_lifecycle_manager/application.log"
+
+	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+
+	if err != nil {
+		log.Println("Failed to open log file", err)
+		log.Println("Using stdout to log")
+		return os.Stdout
+	}
+
+	// defer file.Close()
+
+	return file
 }
 
 func (sl *Logger) Debug(msg string, keysAndValues ...interface{}) {
