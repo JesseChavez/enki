@@ -87,7 +87,13 @@ func (enq *Enqueuer) PerformNow(jobName string, args Args) (string, error) {
 
 	if len(failure) > 0 {
 		enq.LogError("Error:", failure)
-		return id, failure[0]
+		baseError := failure[0]
+		if baseError.Error() == "" {
+			return id, errors.New("Empty error detected running job")
+		} else {
+			return id, baseError
+		}
+
 	}
 
 	return id, nil
