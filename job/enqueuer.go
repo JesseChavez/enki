@@ -50,7 +50,8 @@ func (enq *Enqueuer) Register(queue string, job ActiveJob) {
 }
 
 func (enq *Enqueuer) PerformNow(jobName string, args Args) (string, error) {
-	log.Println("registered queues:", enq.JobList)
+	// log.Println("registered queues:", enq.JobList)
+	log.Println("performing job:", jobName)
 
 	jobModel := enq.JobList[jobName]
 
@@ -61,7 +62,7 @@ func (enq *Enqueuer) PerformNow(jobName string, args Args) (string, error) {
 	
 	job := reflect.New(jobModel)
 
-	log.Println("jxxx:", job)
+	// log.Println("jxxx:", job)
 
 	method := job.MethodByName("Perform")
 
@@ -94,7 +95,7 @@ func (enq *Enqueuer) Enqueue(task *Task, args Args) (string, error) {
 
 	jobName := task.name
 
-	log.Println("registered queues:", enq.JobList)
+	// log.Println("registered queues:", enq.JobList)
 
 	jobModel := enq.JobList[jobName]
 
@@ -113,7 +114,7 @@ func (enq *Enqueuer) Enqueue(task *Task, args Args) (string, error) {
 
 	job := reflect.New(jobModel)
 	
-	log.Println("xxx:", job)
+	// log.Println("xxx:", job)
 
 	values := enq.configuredValues(task, job)
 

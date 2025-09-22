@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"math"
 	"os"
 	"strconv"
@@ -77,7 +78,7 @@ func (ex *JobExecutor) TimerTask(ctx context.Context) {
 }
 
 func (ex *JobExecutor) ProcessJob(ctx context.Context) {
-	fmt.Println("performing jobs")
+	// fmt.Println("performing job")
 
 	jobs := []QueuedJob{}
 
