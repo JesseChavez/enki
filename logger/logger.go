@@ -12,7 +12,7 @@ type Logger struct {
 	log *slog.Logger
 }
 
-func New(appName string,appLogLevel string) *Logger {
+func New(instance string, appName string,appLogLevel string) *Logger {
 	nlog := Logger{}
     // sl := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
@@ -38,7 +38,7 @@ func New(appName string,appLogLevel string) *Logger {
 	if fileLogging == "" {
 		handler = slog.NewTextHandler(os.Stdout, options)
 	} else {
-		output, err := OutputStream(appName)
+		output, err := OutputStream(instance, appName)
 
 		if err != nil {
 			log.Println("Error opening log file", err)
@@ -57,10 +57,10 @@ func New(appName string,appLogLevel string) *Logger {
     return &nlog
 }
 
-func OutputStream(appName string) (*File, error) {
+func OutputStream(instance string, appName string) (*File, error) {
 	fileDir := "/var/local/log"
 
-	fileName := "web-output-" + appName + ".log"
+	fileName := instance + "-output-" + appName + ".log"
 
 	file, err := NewDaily(fileDir, fileName, nil)
 
