@@ -8,6 +8,8 @@ type IJobSupport interface {
 	PerformLater(job string, args Args) (string, error)
 	Wait(duration time.Duration) *Task
 	WaitUntil(runAt time.Time) *Task
+	LogInfo(msg string, keysAndValues ...interface{})
+	LogError(msg string, keysAndValues ...interface{})
 }
 
 type Task struct {
@@ -79,4 +81,12 @@ func (task *Task) PerformLater(jobName string, args Args) (string, error) {
 	id, err := task.enqueuer.Enqueue(task, args)
 
 	return id, err
+}
+
+func (enq *Enqueuer) LogInfo(msg string, keysAndValues ...interface{}) {
+    enq.Log.Info(msg, keysAndValues...)
+}
+
+func (enq *Enqueuer) LogError(msg string, keysAndValues ...interface{}) {
+    enq.Log.Error(msg, keysAndValues...)
 }

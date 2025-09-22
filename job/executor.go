@@ -3,7 +3,6 @@ package job
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"math"
 	"os"
 	"strconv"
@@ -69,7 +68,7 @@ func (ex *JobExecutor) TimerTask(ctx context.Context) {
     case <-ticker.C:
       ex.ProcessJob(ctx)
     case <-ctx.Done():
-      fmt.Println("stopping job processing")
+      ex.JobSupport.LogInfo("Stopping job processing")
       ticker.Stop()
       return
     }
@@ -92,7 +91,7 @@ func (ex *JobExecutor) ProcessJob(ctx context.Context) {
 	)
 
 	if err != nil {
-		fmt.Println("Error fetching jobs:", err)
+		ex.JobSupport.LogError("Error fetching jobs:", err)
 		return
 	}
 
@@ -110,18 +109,18 @@ func (ex *JobExecutor) executeJob(ctx context.Context, job QueuedJob) bool {
 	err = ex.lockJob(ctx, rightNow, job)
 
 	if err != nil {
-		fmt.Println("Error locking jobs:", err)
+		ex.JobSupport.LogError("Error locking jobs:", err)
 		return true
 	}
 
 	err = ex.perform(job)
 
 	if err != nil {
-		fmt.Println("Error performing jobs:", err)
+		ex.JobSupport.LogError("Error performing jobs:", err)
 		err = ex.unlockJob(ctx, rightNow, job, err)
 
 		if err != nil {
-			fmt.Println("Error unlocking jobs:", err)
+			ex.JobSupport.LogError("Error unlocking jobs:", err)
 		}
 
 		return true
@@ -130,7 +129,7 @@ func (ex *JobExecutor) executeJob(ctx context.Context, job QueuedJob) bool {
 	err = ex.DB.Delete(ctx, &job)
 
 	if err != nil {
-		fmt.Println("Error deleting job:", err)
+		ex.JobSupport.LogError("Error deleting job:", err)
 		return true
 	}
 

@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/JesseChavez/enki/logger"
 	"github.com/go-rel/rel"
 	"github.com/google/uuid"
 )
@@ -20,6 +21,7 @@ type Enqueuer struct {
 	env     string
 	db      rel.Repository
 	JobList map[string]ActiveJob
+	Log     logger.ILogger
 }
 
 type JobDefaults struct {
@@ -28,11 +30,12 @@ type JobDefaults struct {
 	runAt    time.Time
 }
 
-func New(env string, db rel.Repository) *Enqueuer {
+func New(env string, db rel.Repository, logger logger.ILogger) *Enqueuer {
 	enqueuer := Enqueuer{
 		env:     env,
 		db:      db,
 		JobList: make(map[string]ActiveJob),
+		Log:     logger,
 	}
 
 	return &enqueuer
@@ -51,12 +54,12 @@ func (enq *Enqueuer) Register(queue string, job ActiveJob) {
 
 func (enq *Enqueuer) PerformNow(jobName string, args Args) (string, error) {
 	// log.Println("registered queues:", enq.JobList)
-	log.Println("performing job:", jobName)
+	enq.LogInfo("performing job:", jobName)
 
 	jobModel := enq.JobList[jobName]
 
 	if jobModel == nil {
-		log.Println("Job not defined:", jobModel)
+		enq.LogError("Job not defined:", jobModel)
 		return "", errors.New("Undefined Job")
 	}
 	
@@ -67,7 +70,7 @@ func (enq *Enqueuer) PerformNow(jobName string, args Args) (string, error) {
 	method := job.MethodByName("Perform")
 
 	if !method.IsValid() {
-		log.Println("Perform not defined")
+		enq.LogError("Perform not defined")
 		return "", errors.New("Undefined Perform menthod")
 	}
 
@@ -83,7 +86,7 @@ func (enq *Enqueuer) PerformNow(jobName string, args Args) (string, error) {
 	failure := wrappedFailure[0].Interface().([]error)
 
 	if len(failure) > 0 {
-		log.Println("Error:", failure)
+		enq.LogError("Error:", failure)
 		return id, failure[0]
 	}
 
@@ -100,14 +103,14 @@ func (enq *Enqueuer) Enqueue(task *Task, args Args) (string, error) {
 	jobModel := enq.JobList[jobName]
 
 	if jobModel == nil {
-		log.Println("Job not defined:", jobName)
+		enq.LogError("Job not defined:", jobName)
 		return "", errors.New("Undefined Job")
 	}
 
 	sArgs, err := json.Marshal(args)
 
 	if err != nil {
-		log.Println("Failure serializing Args:", args)
+		enq.LogError("Failure serializing Args:", args)
 		return "", err
 	}
 
@@ -165,7 +168,7 @@ func (enq *Enqueuer) configuredValues(task *Task, job reflect.Value) *JobDefault
 	method := job.MethodByName("Init")
 
 	if !method.IsValid() {
-		log.Println("Init not defined")
+		enq.LogError("Init not defined")
 		return &values
 	}
 

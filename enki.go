@@ -37,13 +37,7 @@ type Repository = rel.Repository
 
 type ActionView = view.ActionView
 
-type ILogger interface {
-	Debug(msg string, keysAndValues ...interface{})
-	Info(msg string, keysAndValues ...interface{})
-	Warn(msg string, keysAndValues ...interface{})
-	Error(msg string, keysAndValues ...interface{})
-	Fatal(msg string, keysAndValues ...interface{})
-}
+type ILogger = logger.ILogger
 
 type IViewSupport interface {
 	RoutePath(string) string
@@ -164,7 +158,7 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 	ek.ViewSupport = view.New(ek.Env, api, csr, contextPath, rootPath, Resources)
 
 	log.Println("jobs support")
-	ek.JobSupport = job.New(ek.Env, ek.DB)
+	ek.JobSupport = job.New(ek.Env, ek.DB, ek.Logger)
 
 	// Enable static assets server
 	ek.staticAssets(contextPath, ek.Routes)
@@ -187,7 +181,7 @@ func (ek *Enki) InitJobApplication() {
 	intializeDatabase(ek)
 
 	log.Println("jobs support")
-	ek.JobSupport = job.New(ek.Env, ek.DB)
+	ek.JobSupport = job.New(ek.Env, ek.DB, ek.Logger)
 }
 
 func (ek *Enki) ExecuteCommand(command []string) {
