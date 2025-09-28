@@ -66,11 +66,19 @@ func New(instance string, appName string,appLogLevel string) *Logger {
 }
 
 func OutputStream(instance string, appName string) (*File, error) {
-	fileDir := "/var/local/log"
+	baseLogDir := "/var/local/log/" + appName
+
+	logDir := baseLogDir + "/" + instance
+
+	err := os.MkdirAll(logDir, 0770)
+
+	if err != nil {
+		log.Fatalf("Unable to set up log files directory '%v'", logDir)
+	}
 
 	fileName := instance + "-output-" + appName + ".log"
 
-	file, err := NewDaily(fileDir, fileName, nil)
+	file, err := NewDaily(logDir, fileName, nil)
 
 	// defer file.Close()
 

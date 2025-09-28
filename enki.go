@@ -144,7 +144,7 @@ func (ek *Enki) Version() string {
 
 func (ek *Enki) InitWebApplication(contextMux *Mux) {
 	// init logger
-	ek.Logger = logger.New("web", ek.AppName, logLevel)
+	ek.Logger = logger.New("webapp", ek.AppName, logLevel)
 
 	// initialize session manager
 	ek.SessionManager = bouncer.New(
