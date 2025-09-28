@@ -27,7 +27,7 @@ import (
 	_ "github.com/microsoft/go-mssqldb"
 )
 
-const version = "0.6.4"
+const version = "0.6.5"
 
 type Mux = chi.Mux
 
