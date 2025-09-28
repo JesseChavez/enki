@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/JesseChavez/enki/logger"
 	"github.com/JesseChavez/enki/renderer"
 	"github.com/go-chi/chi/v5"
 )
@@ -32,7 +33,7 @@ var defaultMimeType = "text/html"
 
 var defaultCharset = "utf-8"
 
-func New(env string, api bool, csr bool, contextPath string, rootPath string, files embed.FS) *ViewSupport {
+func New(env string, logger logger.ILogger, api bool, csr bool, contextPath string, rootPath string, files embed.FS) *ViewSupport {
 	prefixPath := ""
 
 	if contextPath != "/" {
@@ -44,7 +45,7 @@ func New(env string, api bool, csr bool, contextPath string, rootPath string, fi
 		api:        api,
 		csr:        csr,
 		prefixPath: prefixPath,
-		Renderer: renderer.New(env, contextPath, rootPath, files),
+		Renderer: renderer.New(env, logger, contextPath, rootPath, files),
 	}
 
 	return &support

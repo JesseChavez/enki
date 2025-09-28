@@ -8,11 +8,12 @@ import (
 	"fmt"
 	"html/template"
 	"io/fs"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/JesseChavez/enki/logger"
 )
 
 type Renderer struct {
@@ -21,6 +22,7 @@ type Renderer struct {
 	rootPath   string
 	tmplPath   string
 	files      embed.FS
+	Log        logger.ILogger
 }
 
 var prefixPath = ""
@@ -33,7 +35,7 @@ var Manifest = map[string]string{}
 
 var TemplateCache = map[string]*template.Template{}
 
-func New(env string, contextPath string, rootPath string, files embed.FS) *Renderer {
+func New(env string, logger logger.ILogger, contextPath string, rootPath string, files embed.FS) *Renderer {
 	if contextPath != "/" {
 		prefixPath = contextPath
 	}
@@ -44,6 +46,7 @@ func New(env string, contextPath string, rootPath string, files embed.FS) *Rende
 		rootPath:   rootPath,
 		tmplPath:   "app/templates",
 		files:      files,
+		Log:        logger,
 	}
 
 	envRender = env
@@ -57,7 +60,7 @@ func (ren *Renderer) Render(w http.ResponseWriter, status int, meta map[string]s
 	parsedTmpl, err := ren.fetchTemplate(tmpl)
 
 	if err != nil {
-		log.Println(err)
+		ren.Log.Error("Render, fetch template:", err)
 		return
 	}
 
@@ -68,7 +71,7 @@ func (ren *Renderer) Render(w http.ResponseWriter, status int, meta map[string]s
 	err = parsedTmpl.Execute(w, data)
 
 	if err != nil {
-		log.Println("Error on template exec:", err)
+		ren.Log.Error("Render, template execute", err)
 		return
 	}
 
@@ -97,7 +100,7 @@ func (ren *Renderer) RenderHTML(w http.ResponseWriter, status int, tmpl string, 
 	parsedTmpl, err := ren.fetchTemplate(tmpl)
 
 	if err != nil {
-		log.Println(err)
+		ren.Log.Error("RenderHTML, fetch template:", err)
 		return
 	}
 
@@ -108,7 +111,7 @@ func (ren *Renderer) RenderHTML(w http.ResponseWriter, status int, tmpl string, 
 	err = parsedTmpl.Execute(w, data)
 
 	if err != nil {
-		log.Println("Error on template exec:", err)
+		ren.Log.Error("RenderHTML, template execute", err)
 		return
 	}
 
@@ -119,7 +122,7 @@ func (ren *Renderer) RenderXML(w http.ResponseWriter, status int, tmpl string, d
 	parsedTmpl, err := ren.fetchTemplate(tmpl)
 
 	if err != nil {
-		log.Println(err)
+		ren.Log.Error("RenderXML, fetch template:", err)
 		return
 	}
 
@@ -128,7 +131,7 @@ func (ren *Renderer) RenderXML(w http.ResponseWriter, status int, tmpl string, d
 	err = parsedTmpl.Execute(buf, data)
 
 	if err != nil {
-		log.Println("Error on template exec:", err)
+		ren.Log.Error("RenderXML, template execute", err)
 		return
 	}
 
@@ -162,7 +165,7 @@ func (ren *Renderer) templateFromCache(tmpl string) (*template.Template, error) 
 		return parsedTmpl, nil
 	}
 
-	log.Println("Template cache is empty, loading cache")
+	ren.Log.Info("Template cache is empty, loading cache")
 
 	err := ren.templateCache()
 
@@ -184,10 +187,10 @@ func (ren *Renderer) templateCache() error {
 
 	pages, shared := ren.fetchTemplatefiles()
 
-	fmt.Println("Main templates:")
-	fmt.Println(strings.Join(pages, "\n"))
-	fmt.Println("Base templates:")
-	fmt.Println(strings.Join(shared, "\n"))
+	ren.Log.Debug("Main templates:")
+	ren.Log.Debug(strings.Join(pages, "\n"))
+	ren.Log.Debug("Base templates:")
+	ren.Log.Debug(strings.Join(shared, "\n"))
 
 	for _, page := range pages {
 		name := filepath.Base(page)
@@ -221,7 +224,7 @@ func (ren *Renderer) fetchTemplatefiles() (pages []string, shared []string) {
 	files, err := fs.Glob(ren.files, filePattern)
 
 	if err != nil {
-		log.Println("Error finding tempates:", err)
+		ren.Log.Error("Error finding tempates:", err)
 		return pages, shared
 	}
 
@@ -260,7 +263,7 @@ func (ren *Renderer) templateFromDisk(tmpl string) (*template.Template, error) {
 	shared, err := filepath.Glob(sharedPattern)
 
 	if err != nil {
-		log.Println("Error finding tempates:", err)
+		ren.Log.Error("Error finding tempates:", err)
 		return nil, err
 	}
 
@@ -271,9 +274,9 @@ func (ren *Renderer) templateFromDisk(tmpl string) (*template.Template, error) {
 		}
 	}
 
-	log.Println("Templates:")
-	fmt.Println(strings.Join(shared, "\n"))
-	fmt.Println(tmplFile)
+	ren.Log.Debug("Templates:")
+	ren.Log.Debug(strings.Join(shared, "\n"))
+	ren.Log.Debug(tmplFile)
 
 	return parsedTmpl, nil
 }
@@ -282,13 +285,13 @@ func (ren *Renderer) loadManifest() error {
 	mfile, err := ren.files.ReadFile("public/assets/manifest.json")
 
 	if err != nil {
-		log.Println("Error reading assets manifest.json:", err)
+		ren.Log.Error("Error reading assets manifest.json:", err)
 	}
 
 	err = json.Unmarshal([]byte(mfile), &Manifest)
 
 	if err != nil {
-		log.Println("Error parsing assets manifest.json:", err)
+		ren.Log.Error("Error parsing assets manifest.json:", err)
 	}
 
 	return nil
@@ -300,13 +303,13 @@ func (ren *Renderer) loadManifestDev() error {
 	mfile, err := os.ReadFile(mpath)
 
 	if err != nil {
-		log.Println("Error reading assets manifest.json:", err)
+		ren.Log.Error("Error reading assets manifest.json:", err)
 	}
 
 	err = json.Unmarshal([]byte(mfile), &Manifest)
 
 	if err != nil {
-		log.Println("Error parsing assets manifest.json:", err)
+		ren.Log.Error("Error parsing assets manifest.json:", err)
 	}
 
 	return nil

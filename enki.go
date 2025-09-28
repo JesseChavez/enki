@@ -155,7 +155,7 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 	intializeDatabase(ek)
 
 	// init support (renderer and helpers)
-	ek.ViewSupport = view.New(ek.Env, api, csr, contextPath, rootPath, Resources)
+	ek.ViewSupport = view.New(ek.Env, ek.Logger,  api, csr, contextPath, rootPath, Resources)
 
 	log.Println("jobs support")
 	ek.JobSupport = job.New(ek.Env, ek.DB, ek.Logger)
