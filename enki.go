@@ -135,9 +135,6 @@ func New(name string) Enki {
 	api = API
 	csr = CSR
 
-	// init logger
-	app.Logger = logger.New("webapp", app.AppName, logLevel)
-
 	return app
 }
 
@@ -146,6 +143,9 @@ func (ek *Enki) Version() string {
 }
 
 func (ek *Enki) InitWebApplication(contextMux *Mux) {
+	// init logger
+	ek.Logger = logger.New("webapp", ek.AppName, logLevel)
+
 	// initialize session manager
 	ek.SessionManager = bouncer.New(
 		sessionKey, secretKeyBase, authenticatedEncryptedCookieSalt, sessionMaxAge, false,
@@ -174,6 +174,9 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 }
 
 func (ek *Enki) InitJobApplication() {
+	// init logger
+	ek.Logger = logger.New("bgproc", ek.AppName, logLevel)
+
 	// init db
 	intializeDatabase(ek)
 
