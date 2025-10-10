@@ -82,8 +82,10 @@ func (supp *ViewSupport) RenderXML(w http.ResponseWriter, status int, view *Acti
 	supp.Renderer.RenderXML(w, status, template, view.Data)
 }
 
-func (supp *ViewSupport) RoutePath(path string) string {
-	return fmt.Sprintf("%s/%v", supp.prefixPath, path)
+func (supp *ViewSupport) RoutePath(path string, urlParams ...any) string {
+	segment := fmt.Sprintf("%s/%s", supp.prefixPath, path)
+
+	return fmt.Sprintf(segment, urlParams...)
 }
 
 func (supp *ViewSupport) AssetPath(fileName string) string {

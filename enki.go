@@ -40,7 +40,7 @@ type ActionView = view.ActionView
 type ILogger = logger.ILogger
 
 type IViewSupport interface {
-	RoutePath(string) string
+	RoutePath(path string, urlParams ...any) string
 	AssetPath(string) string
 	URLParam(*http.Request, string) string
 	Render(w http.ResponseWriter, status int, view *ActionView)
