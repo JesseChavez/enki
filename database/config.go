@@ -123,14 +123,29 @@ func ConfigFile(appName string, env string, rootPath string, resources embed.FS)
 		log.Println("Trying embeded file")
 	}
 
-	file, err := resources.ReadFile("config/database.yml")
-
 	log.Println("Project root:", rootPath)
+
+	overrideFile := rootPath + "/database.yml"
+
+	file, err := os.ReadFile(overrideFile)
+
+	if err == nil {
+		log.Println("loading file:", overrideFile)
+		expandedFile := os.ExpandEnv(string(file))
+		return []byte(expandedFile)
+	}
+
+	log.Println("DB file not found:", overrideFile)
+
+	defaultFile := "config/database.yml"
+
+	file, err = resources.ReadFile(defaultFile)
 
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
+	log.Println("loading file:",defaultFile)
 	expandedFile := os.ExpandEnv(string(file))
 	return []byte(expandedFile)
 }
