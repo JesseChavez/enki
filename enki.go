@@ -27,7 +27,7 @@ import (
 	_ "github.com/microsoft/go-mssqldb"
 )
 
-const version = "0.6.7"
+const version = "0.6.8"
 
 type Mux = chi.Mux
 
@@ -58,17 +58,16 @@ type Args = job.Args
 type IJobSupport = job.IJobSupport
 
 type Enki struct {
-	AppName      string
-	Env          string
-	Routes       *Mux
-	DBConfig     database.Config
-	DB           Repository
-	Logger       ILogger
+	AppName        string
+	Env            string
+	Routes         *Mux
+	DBConfig       database.Config
+	DB             Repository
+	Logger         ILogger
 	SessionManager ISessionManager
 	ViewSupport    IViewSupport
 	JobSupport     IJobSupport
 }
-
 
 var BaseDir string
 
@@ -87,7 +86,6 @@ var TimeZone = "UTC"
 var LogLevel = "info"
 
 var SecretKeyBase = "secret-key-base"
-
 
 var AuthenticatedEncryptedCookieSalt = "authenticated encrypted cookie"
 
@@ -155,7 +153,7 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 	intializeDatabase(ek)
 
 	// init support (renderer and helpers)
-	ek.ViewSupport = view.New(ek.Env, ek.Logger,  api, csr, contextPath, rootPath, Resources)
+	ek.ViewSupport = view.New(ek.Env, ek.Logger, api, csr, contextPath, rootPath, Resources)
 
 	log.Println("jobs support")
 	ek.JobSupport = job.New(ek.Env, ek.DB, ek.Logger)
@@ -167,7 +165,6 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 	ek.Routes.Get("/shutdown", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Sutdown request")
 		w.Write([]byte("OK"))
-
 
 		StatusCode <- "stop"
 	})
@@ -186,7 +183,7 @@ func (ek *Enki) InitJobApplication() {
 
 func (ek *Enki) ExecuteCommand(command []string) {
 	runner := commands.Runner{
-		Env: ek.Env,
+		Env:     ek.Env,
 		Command: command,
 	}
 
@@ -222,7 +219,6 @@ func intializeDatabase(ek *Enki) {
 	} else {
 		log.Println("DB connection url:", fakeUrl)
 	}
-
 
 	var adapter rel.Adapter
 	var err error
