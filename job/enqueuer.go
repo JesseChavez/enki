@@ -54,7 +54,7 @@ func (enq *Enqueuer) Register(queue string, job ActiveJob) {
 
 func (enq *Enqueuer) PerformNow(jobName string, args Args) (string, error) {
 	// log.Println("registered queues:", enq.JobList)
-	enq.LogInfo("performing job:", jobName)
+	enq.LogInfo("performing job", "name", jobName)
 
 	jobModel := enq.JobList[jobName]
 
@@ -62,7 +62,7 @@ func (enq *Enqueuer) PerformNow(jobName string, args Args) (string, error) {
 		enq.LogError("Job not defined:", jobModel)
 		return "", errors.New("Undefined Job")
 	}
-	
+
 	job := reflect.New(jobModel)
 
 	// log.Println("jxxx:", job)
@@ -73,7 +73,6 @@ func (enq *Enqueuer) PerformNow(jobName string, args Args) (string, error) {
 		enq.LogError("Perform not defined")
 		return "", errors.New("Undefined Perform menthod")
 	}
-
 
 	id := uuid.New().String()
 	// Prepare arguments for the method call
@@ -120,9 +119,8 @@ func (enq *Enqueuer) Enqueue(task *Task, args Args) (string, error) {
 		return "", err
 	}
 
-
 	job := reflect.New(jobModel)
-	
+
 	// log.Println("xxx:", job)
 
 	values := enq.configuredValues(task, job)
@@ -131,21 +129,21 @@ func (enq *Enqueuer) Enqueue(task *Task, args Args) (string, error) {
 
 	record := QueuedJob{}
 
-	record.Queue    = values.Queue
-	record.Handler  = "JobExecutor"
+	record.Queue = values.Queue
+	record.Handler = "JobExecutor"
 	record.JobClass = jobName
-	record.JobId    = id
+	record.JobId = id
 	record.Priority = values.Priority
 	record.Attempts = 0
-	record.State    = "scheduled"
-	record.Args     = string(sArgs)
-	record.RunAt    = values.runAt
+	record.State = "scheduled"
+	record.Args = string(sArgs)
+	record.RunAt = values.runAt
 
 	ctx := context.Background()
 
 	err = enq.db.Insert(ctx, &record)
 
-	return id , err
+	return id, err
 }
 
 func (enq *Enqueuer) configuredValues(task *Task, job reflect.Value) *JobDefaults {
@@ -166,9 +164,9 @@ func (enq *Enqueuer) configuredValues(task *Task, job reflect.Value) *JobDefault
 	}
 
 	values := JobDefaults{
-		Queue: queue,
+		Queue:    queue,
 		Priority: priority,
-		runAt: runAt,
+		runAt:    runAt,
 	}
 
 	method := job.MethodByName("Init")
@@ -185,13 +183,11 @@ func (enq *Enqueuer) configuredValues(task *Task, job reflect.Value) *JobDefault
 
 	priorityField := reflect.Indirect(job).FieldByName("Priority")
 
-
 	if enq.fieldPresent(priorityField, values.Priority) {
 		values.Priority = int(priorityField.Int())
 	}
 
 	queueField := reflect.Indirect(job).FieldByName("Queue")
-
 
 	if enq.fieldPresent(queueField, values.Queue) {
 		values.Queue = queueField.String()
