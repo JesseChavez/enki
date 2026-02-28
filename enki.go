@@ -27,7 +27,7 @@ import (
 	_ "github.com/microsoft/go-mssqldb"
 )
 
-const version = "0.6.8"
+const moduleVersion = "0.6.9"
 
 type Mux = chi.Mux
 
@@ -137,7 +137,7 @@ func New(name string) Enki {
 }
 
 func (ek *Enki) Version() string {
-	return version
+	return moduleVersion
 }
 
 func (ek *Enki) InitWebApplication(contextMux *Mux) {
