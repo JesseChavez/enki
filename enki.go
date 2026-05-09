@@ -75,6 +75,8 @@ var Resources embed.FS
 
 var ContextPath = "/"
 
+var ConfigDir = "/var/local/config"
+
 var SessionKey = "_enki_session"
 
 var SessionMaxAge = 30
@@ -98,6 +100,7 @@ var CSR = false
 // private variables
 var webPort string
 var timeZone string
+var configDir string
 var logLevel string
 var logBaseDir string
 var contextPath string
@@ -120,6 +123,7 @@ func New(name string) Enki {
 
 	webPort = WebPort
 	timeZone = TimeZone
+	configDir = ConfigDir
 	logLevel = LogLevel
 	logBaseDir = LogBaseDir
 	contextPath = ContextPath
@@ -273,7 +277,7 @@ func intializeDatabase(ek *Enki) {
 }
 
 func (ek *Enki) NewDBConfig() database.EnvConfig {
-	blob := database.ConfigFile(ek.AppName, ek.Env, rootPath, Resources)
+	blob := database.ConfigFile(ek.AppName, ek.Env, configDir, rootPath, Resources)
 
 	config := database.NewConfig(blob, ek.Env)
 

@@ -81,11 +81,11 @@ func (conf *EnvConfig) GetEnv(env string) Config {
 	return params
 }
 
-func ConfigFile(appName string, env string, rootPath string, resources embed.FS) []byte {
+func ConfigFile(appName string, env string, configDir string, rootPath string, resources embed.FS) []byte {
 	if env == "production" {
 		fileName := "database_" + appName + ".yml"
 
-		systemFile := "/var/local/config/" + fileName
+		systemFile := configDir + "/" + fileName
 
 		file, err := os.ReadFile(systemFile)
 
@@ -94,7 +94,7 @@ func ConfigFile(appName string, env string, rootPath string, resources embed.FS)
 			expandedFile := os.ExpandEnv(string(file))
 			return []byte(expandedFile)
 		}
-		
+
 		log.Println("DB system file not found:", systemFile)
 
 		systemWorkingDirFile := rootPath + "/" + fileName
@@ -145,7 +145,7 @@ func ConfigFile(appName string, env string, rootPath string, resources embed.FS)
 		log.Fatal(err.Error())
 	}
 
-	log.Println("loading file:",defaultFile)
+	log.Println("loading file:", defaultFile)
 	expandedFile := os.ExpandEnv(string(file))
 	return []byte(expandedFile)
 }
