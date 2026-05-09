@@ -20,9 +20,9 @@ type Logger struct {
 	log *slog.Logger
 }
 
-func New(instance string, appName string,appLogLevel string) *Logger {
+func New(instance string, appName string, appLogLevel string, logBaseDir string) *Logger {
 	nlog := Logger{}
-    // sl := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	// sl := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 	logLevel := slog.LevelDebug
 
@@ -46,7 +46,7 @@ func New(instance string, appName string,appLogLevel string) *Logger {
 	if fileLogging == "" {
 		handler = slog.NewTextHandler(os.Stdout, options)
 	} else {
-		output, err := OutputStream(instance, appName)
+		output, err := OutputStream(instance, appName, logBaseDir)
 
 		if err != nil {
 			log.Println("Error opening log file", err)
@@ -62,11 +62,11 @@ func New(instance string, appName string,appLogLevel string) *Logger {
 
 	nlog.log = sl
 
-    return &nlog
+	return &nlog
 }
 
-func OutputStream(instance string, appName string) (*File, error) {
-	baseLogDir := "/var/local/log/" + appName
+func OutputStream(instance string, appName string, logBaseDir string) (*File, error) {
+	baseLogDir := logBaseDir + "/" + appName
 
 	logDir := baseLogDir + "/" + instance
 
@@ -86,22 +86,22 @@ func OutputStream(instance string, appName string) (*File, error) {
 }
 
 func (sl *Logger) Debug(msg string, keysAndValues ...interface{}) {
-    sl.log.Debug(msg, keysAndValues...)
+	sl.log.Debug(msg, keysAndValues...)
 }
 
 func (sl *Logger) Info(msg string, keysAndValues ...interface{}) {
-    sl.log.Info(msg, keysAndValues...)
+	sl.log.Info(msg, keysAndValues...)
 }
 
 func (sl *Logger) Warn(msg string, keysAndValues ...interface{}) {
-    sl.log.Warn(msg, keysAndValues...)
+	sl.log.Warn(msg, keysAndValues...)
 }
 
 func (sl *Logger) Error(msg string, keysAndValues ...interface{}) {
-    sl.log.Error(msg, keysAndValues...)
+	sl.log.Error(msg, keysAndValues...)
 }
 
 func (sl *Logger) Fatal(msg string, keysAndValues ...interface{}) {
-    sl.log.Error(msg, keysAndValues...)
-    log.Fatal(msg)
+	sl.log.Error(msg, keysAndValues...)
+	log.Fatal(msg)
 }

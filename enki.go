@@ -85,6 +85,8 @@ var TimeZone = "UTC"
 
 var LogLevel = "info"
 
+var LogBaseDir = "/var/local/log"
+
 var SecretKeyBase = "secret-key-base"
 
 var AuthenticatedEncryptedCookieSalt = "authenticated encrypted cookie"
@@ -97,6 +99,7 @@ var CSR = false
 var webPort string
 var timeZone string
 var logLevel string
+var logBaseDir string
 var contextPath string
 var sessionKey string
 var sessionMaxAge int
@@ -118,6 +121,7 @@ func New(name string) Enki {
 	webPort = WebPort
 	timeZone = TimeZone
 	logLevel = LogLevel
+	logBaseDir = LogBaseDir
 	contextPath = ContextPath
 	sessionKey = SessionKey
 	sessionMaxAge = SessionMaxAge
@@ -142,7 +146,7 @@ func (ek *Enki) Version() string {
 
 func (ek *Enki) InitWebApplication(contextMux *Mux) {
 	// init logger
-	ek.Logger = logger.New("webapp", ek.AppName, logLevel)
+	ek.Logger = logger.New("webapp", ek.AppName, logLevel, logBaseDir)
 
 	// initialize session manager
 	ek.SessionManager = bouncer.New(
@@ -172,7 +176,7 @@ func (ek *Enki) InitWebApplication(contextMux *Mux) {
 
 func (ek *Enki) InitJobApplication() {
 	// init logger
-	ek.Logger = logger.New("bgproc", ek.AppName, logLevel)
+	ek.Logger = logger.New("bgproc", ek.AppName, logLevel, logBaseDir)
 
 	// init db
 	intializeDatabase(ek)
