@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-        _ "time/tzdata"
+	_ "time/tzdata"
 
 	"github.com/JesseChavez/enki/bouncer"
 	"github.com/JesseChavez/enki/commands"
@@ -28,7 +28,7 @@ import (
 	_ "github.com/microsoft/go-mssqldb"
 )
 
-const moduleVersion = "0.6.11"
+const moduleVersion = "0.6.12"
 
 type Mux = chi.Mux
 
