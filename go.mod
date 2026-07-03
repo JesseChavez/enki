@@ -4,13 +4,13 @@ go 1.26.0
 
 require (
 	github.com/JesseChavez/spt v0.1.0
-	github.com/go-chi/chi/v5 v5.2.5
+	github.com/go-chi/chi/v5 v5.3.0
 	github.com/go-rel/mssql v0.13.0
 	github.com/go-rel/postgres v0.12.0
 	github.com/go-rel/rel v0.42.0
 	github.com/google/uuid v1.6.0
-	github.com/lib/pq v1.11.2
-	github.com/microsoft/go-mssqldb v1.9.7
+	github.com/lib/pq v1.12.3
+	github.com/microsoft/go-mssqldb v1.10.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -21,6 +21,6 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/serenize/snaker v0.0.0-20201027110005-a7ad2135616e // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
-	golang.org/x/crypto v0.48.0 // indirect
-	golang.org/x/text v0.34.0 // indirect
+	golang.org/x/crypto v0.53.0 // indirect
+	golang.org/x/text v0.38.0 // indirect
 )
