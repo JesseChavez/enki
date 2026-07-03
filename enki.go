@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+        _ "time/tzdata"
 
 	"github.com/JesseChavez/enki/bouncer"
 	"github.com/JesseChavez/enki/commands"
